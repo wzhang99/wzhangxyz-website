@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All the Way Down</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
         /* Optional: Basic body styling */
         body {
@@ -13,7 +14,9 @@
             line-height: 1.6;
             color: #333; /* Dark grey text */
             background-color: #ffffff; /* White background */
+            padding: 20px; /* Add some padding around the content */
         }
+
         /* Custom styles for the table-like layout */
         .item-grid {
             display: grid;
@@ -42,6 +45,184 @@
         /* .header-title-link:hover {
             text-decoration: underline;
         } */
+
+        /* Added styles based on previous screenshot replication */
+        body {
+            padding: 20px;
+        }
+
+        .site-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .site-title-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .site-title {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .site-nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #666;
+        }
+
+        .site-nav a:hover {
+            color: #333;
+        }
+
+        .main-logo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .site-logo {
+            width: 60px;
+            height: 60px;
+            background-color: #ccc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .main-site-title {
+            font-size: 1.5em;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            letter-spacing: 0.2em;
+        }
+
+        .filter-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .filter-nav a {
+            margin: 0 10px;
+        }
+
+        .filter-link {
+            text-decoration: none;
+            color: #666;
+            padding-bottom: 5px;
+        }
+
+        .filter-link:hover {
+            color: #333;
+        }
+
+        .filter-link.active {
+            color: #333;
+            border-bottom: 2px solid #333;
+        }
+
+        .divider-line {
+            border-bottom: 1px solid #ddd;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .content-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1.5fr;
+            gap: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .item-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .item-author {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .item-meta {
+            font-size: 0.8em;
+            color: #777;
+            margin-bottom: 3px;
+        }
+
+        .item-type {
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .item-images {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .item-images img {
+            margin-left: 10px;
+        }
+
+        .item-image {
+            width: 50px;
+            height: auto;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .item-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .item-images {
+                justify-content: flex-start;
+            }
+
+            .site-header {
+                flex-direction: column;
+                margin-bottom: 20px;
+            }
+
+            .site-nav {
+                margin-top: 15px;
+            }
+
+            .main-logo-section {
+                margin-bottom: 20px;
+            }
+
+            .divider-line {
+                margin-bottom: 20px;
+            }
+        }
     </style>
 </head>
 <body class="p-4">
@@ -71,45 +252,47 @@
 
     <div class="border-b border-gray-300 w-full mb-3"></div>
 
-    <div class="container mx-auto max-w-4xl">
+    <div class="content-container">
 
         <div class="item-grid">
-            <div>
-                <h3 class="font-semibold">The Language of Mysticism</h3>
-                <p class="text-sm text-gray-700">Stéphane Mallarmé</p>
-                <p class="text-sm text-gray-600 mt-2">Hardcover : 99 pages</p>
-                <p class="text-sm text-gray-600">Publisher : University of Georgia Press ; First Edition edition (1970)</p>
-                <p class="text-sm text-gray-600">Language : English</p>
-                <p class="text-sm text-gray-600">ISBN-10 : 0820302457</p>
-                <p class="text-sm text-gray-600">ISBN-13 : 978-0820302454</p>
+            <div class="item-details">
+                <h3 class="item-title">The Stranger</h3>
+                <p class="item-author">Albert Camus</p>
+                <p class="item-meta">Paperback : 123 pages</p>
+                <p class="item-meta">Publisher : Vintage International (August 11, 1989)</p>
+                <p class="item-meta">Language : English</p>
+                <p class="item-meta">ISBN-10 : 0679720200</p>
+                <p class="item-meta">ISBN-13 : 978-0679720201</p>
             </div>
 
-            <div class="text-sm text-gray-700">
-                1970, Poetry, Book Design
+            <div class="item-type">
+                1942, Fiction, Philosophy
             </div>
 
             <div class="flex space-x-2 item-images justify-end">
-                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book cover placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
-                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spread placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
-                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spine placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
+                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book cover placeholder" class="item-image">
+                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spread placeholder" class="item-image">
+                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spine placeholder" class="item-image">
             </div>
         </div>
 
         <div class="item-grid">
-            <div>
-                <h3 class="font-semibold">Robert Ryman</h3>
-                <p class="text-sm text-gray-700">Hardcover</p>
-                <p class="text-sm text-gray-600 mt-2">Publisher : Espace d'Art Contemporain, Paris (1991)</p>
-                <p class="text-sm text-gray-600">Language : French, English, German</p>
-                <p class="text-sm text-gray-600">ISBN : 3-906 352-03-x</p>
+            <div class="item-details">
+                <h3 class="item-title">Technological Slavery</h3>
+                <p class="item-author">Ted Kaczynski</p>
+                <p class="item-meta">Paperback : 421 pages</p>
+                <p class="item-meta">Publisher : Feral House ; 1st Edition (June 1, 2010)</p>
+                <p class="item-meta">Language : English</p>
+                <p class="item-meta">ISBN-10 : 1932595801</p>
+                <p class="item-meta">ISBN-13 : 978-1932595802</p>
             </div>
 
-            <div class="text-sm text-gray-700">
-                1991, Arts, Monograph, Artist's Book
+            <div class="item-type">
+                2010, Non-fiction, Philosophy
             </div>
 
             <div class="flex space-x-2 item-images justify-end">
-                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book cover placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
+                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book cover placeholder" class="item-image">
                 <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spread placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
                 <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spine placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
             </div>

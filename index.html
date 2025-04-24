@@ -3,38 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Minimal Website</title>
+    <title>All the Way Down</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Optional: Basic body styling */
         body {
-            font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            /* Changed font-family to include Arizona Serif and similar serifs */
+            font-family: "Arizona Serif", Georgia, 'Times New Roman', Times, serif;
             line-height: 1.6;
             color: #333; /* Dark grey text */
-            background-color: #f4f4f4; /* Light grey background */
+            background-color: #ffffff; /* White background */
         }
+        /* Custom styles for the table-like layout */
+        .item-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1.5fr; /* Adjust column widths as needed */
+            gap: 1rem; /* Gap between columns */
+            border-bottom: 1px solid #e5e7eb; /* Light grey border at the bottom of each row */
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .item-grid {
+                grid-template-columns: 1fr; /* Stack columns on smaller screens */
+                gap: 0.5rem;
+            }
+            .item-images {
+                justify-content: flex-start; /* Align images to the start on small screens */
+            }
+        }
+        /* Style for the clickable title */
+        .header-title-link {
+            text-decoration: none; /* Remove underline from the link */
+            color: inherit; /* Inherit color from parent */
+        }
+        /* Removed the hover underline effect */
+        /* .header-title-link:hover {
+            text-decoration: underline;
+        } */
     </style>
 </head>
 <body class="p-4">
-    <div class="mx-auto max-w-xl bg-white shadow-md rounded-lg p-8 mt-10">
 
-        <h1 class="text-2xl font-bold mb-4">Sample Website v1.0</h1>
+    <header class="flex justify-between items-center mb-8">
+        <a href="index.html" class="header-title-link">
+            <div class="text-lg font-semibold">ALL THE WAY DOWN</div>
+        </a>
+        <nav>
+            <a href="#" class="text-gray-600 hover:text-gray-900 mr-4">INFO</a>
+            <a href="#" class="text-gray-600 hover:text-gray-900">INSTAGRAM</a>
+        </nav>
+    </header>
 
-        <p class="mb-4">
-            Welcome to my personal space online. This is where I'll be writing down my thoughts, observations, and anything else that comes to mind. For now, it's a private journal, but I might share some entries in the future.
-        </p>
+    <div class="flex flex-col items-center mb-8">
+        <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-2xl mb-4">
+            👁️
+        </div>
+        <div class="text-xl font-serif tracking-widest">it's me, william</div>
+    </div>
 
-        <h2 class="text-xl font-semibold mb-3 mt-6">First Entry Title</h2>
-        <p class="text-sm text-gray-600 mb-4">Date: April 24, 2025</p>
-        <p class="mb-4">
-            Today was a day of reflection. I spent some time thinking about the process of learning and how best to capture fleeting ideas before they disappear. This platform feels like the right place to start organizing them.
-        </p>
+    <nav class="flex justify-center space-x-6 mb-8 text-sm font-semibold">
+        <a href="index.html" class="text-gray-900 border-b-2 border-gray-900 pb-1">VIEW ALL</a>
+        <a href="primary.html" class="text-gray-600 hover:text-gray-900 pb-1">PRIMARY</a>
+        <a href="secondary.html" class="text-gray-600 hover:text-gray-900 pb-1">SECONDARY</a>
+    </nav>
 
-        <h2 class="text-xl font-semibold mb-3 mt-6">Another Thought</h2>
-        <p class="text-sm text-gray-600 mb-4">Date: April 23, 2025</p>
-        <p class="mb-4">
-            Experimenting with different writing styles. Trying to find a voice that feels authentic and comfortable. It's a process, and I'm enjoying the exploration.
-        </p>
+    <div class="border-b border-gray-300 w-full mb-3"></div>
+
+    <div class="container mx-auto max-w-4xl">
+
+        <div class="item-grid">
+            <div>
+                <h3 class="font-semibold">The Language of Mysticism</h3>
+                <p class="text-sm text-gray-700">Stéphane Mallarmé</p>
+                <p class="text-sm text-gray-600 mt-2">Hardcover : 99 pages</p>
+                <p class="text-sm text-gray-600">Publisher : University of Georgia Press ; First Edition edition (1970)</p>
+                <p class="text-sm text-gray-600">Language : English</p>
+                <p class="text-sm text-gray-600">ISBN-10 : 0820302457</p>
+                <p class="text-sm text-gray-600">ISBN-13 : 978-0820302454</p>
+            </div>
+
+            <div class="text-sm text-gray-700">
+                1970, Poetry, Book Design
+            </div>
+
+            <div class="flex space-x-2 item-images justify-end">
+                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book cover placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
+                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spread placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
+                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spine placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
+            </div>
+        </div>
+
+        <div class="item-grid">
+            <div>
+                <h3 class="font-semibold">Robert Ryman</h3>
+                <p class="text-sm text-gray-700">Hardcover</p>
+                <p class="text-sm text-gray-600 mt-2">Publisher : Espace d'Art Contemporain, Paris (1991)</p>
+                <p class="text-sm text-gray-600">Language : French, English, German</p>
+                <p class="text-sm text-gray-600">ISBN : 3-906 352-03-x</p>
+            </div>
+
+            <div class="text-sm text-gray-700">
+                1991, Arts, Monograph, Artist's Book
+            </div>
+
+            <div class="flex space-x-2 item-images justify-end">
+                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book cover placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
+                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spread placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
+                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spine placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
+            </div>
+        </div>
 
         </div>
 

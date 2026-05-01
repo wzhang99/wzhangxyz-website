@@ -6,10 +6,7 @@
     <title>William Zhang — About</title>
     <link rel="stylesheet" href="shared.css">
     <style>
-        .about-para {
-            margin-bottom: 2em;
-        }
-
+        .about-para { margin-bottom: 2em; }
         .about-para:last-child { margin-bottom: 0; }
 
         .about-section {
@@ -24,10 +21,7 @@
             flex-shrink: 0;
         }
 
-        .about-photo img {
-            width: 100%;
-            display: block;
-        }
+        .about-photo img { width: 100%; display: block; }
 
         @media (max-width: 600px) {
             .about-section { flex-direction: column; gap: 16px; }
@@ -37,35 +31,38 @@
 </head>
 <body class="is-interior">
 
-<a href="index.html" class="site-name">William Zhang</a>
+<div class="site-container">
+    <header class="page-header">
+        <a href="index.html" class="site-name">William Zhang</a>
+        <nav class="page-nav">
+            <a href="about.html">about</a> &nbsp;·&nbsp;
+            <a href="work.html">work</a> &nbsp;·&nbsp;
+            <span class="nav-dropdown">
+                <span class="nav-trigger">side quests</span>
+                <div class="nav-dropdown-menu">
+                    <a href="reading.html">reading</a>
+                    <a href="writing.html">writing</a>
+                    <a href="thoughts.html">thoughts</a>
+                    <a href="activities.html">activities</a>
+                </div>
+            </span>
+        </nav>
+    </header>
 
-<div class="page-nav">
-    <a href="about.html">about</a> &nbsp;·&nbsp;
-    <a href="work.html">work</a> &nbsp;·&nbsp;
-    <span class="nav-dropdown">
-        <span class="nav-trigger">side quests</span>
-        <div class="nav-dropdown-menu">
-            <a href="reading.html">reading</a>
-            <a href="writing.html">writing</a>
-            <a href="thoughts.html">thoughts</a>
-            <a href="activities.html">activities</a>
+    <main class="page-content">
+        <div class="page-title">about</div>
+
+        <p class="about-para">I invest in early-stage life science companies at Cornucopian Capital in New York, where I lead investments across healthcare, drugs, and consumer health. I look for some combination of broken care models and underserved patient populations—markets where novel science clashes with commercial structure. My deals have spanned pediatric mental health, obesity management, AI-enabled drug discovery, and consumer health, collectively raising >$100mm in follow-on capital. Outside of life sciences and venture capital, I've also spent time in middle market private equity at Altamont Capital Partners in San Francisco where I worked on industrial supply chains.</p>
+
+        <div class="about-section">
+            <div class="about-photo">
+                <img src="content%20-%20about/IMG_2273.jpeg" alt="">
+            </div>
+            <p>I studied physics and computer science at Williams College, spending two years chasing rare particle interactions. One project took me to the Sanford Underground Research Facility, a mile-deep former gold mine in South Dakota, in search of a nuclear decay in tantalum-180 that had never been observed (after running for >1 year, it has still never been observed, setting a new limit of detection). Another project called DarkSide-20k involved building liquid argon detector components for a dual-phase time projection chamber. This work prototyping dark matter detectors to investigate whether WIMPs interact via electroweak forces later became the subject of my honors thesis.</p>
         </div>
-    </span>
-</div>
 
-<div class="page-content">
-    <div class="page-title">about</div>
-
-    <p class="about-para">I invest in early-stage life science companies at Cornucopian Capital in New York, where I lead investments across healthcare, drugs, and consumer health. I look for some combination of broken care models and underserved patient populations—markets where novel science clashes with commercial structure. My deals have spanned pediatric mental health, obesity management, AI-enabled drug discovery, and consumer health, collectively raising >$100mm in follow-on capital. Outside of life sciences and venture capital, I've also spent time in middle market private equity at Altamont Capital Partners in San Francisco where I worked on industrial supply chains.</p>
-
-    <div class="about-section">
-        <div class="about-photo">
-            <img src="content%20-%20about/IMG_2273.jpeg" alt="">
-        </div>
-        <p>I studied physics and computer science at Williams College, spending two years chasing rare particle interactions. One project took me to the Sanford Underground Research Facility, a mile-deep former gold mine in South Dakota, in search of a nuclear decay in tantalum-180 that had never been observed (after running for >1 year, it has still never been observed, setting a new limit of detection). Another project called DarkSide-20k involved building liquid argon detector components for a dual-phase time projection chamber. This work prototyping dark matter detectors to investigate whether WIMPs interact via electroweak forces later became the subject of my honors thesis.</p>
-    </div>
-
-    <p class="about-para">Before Williams, I grew up in New Jersey, where I went to The Pingry School in Basking Ridge and started swimming competitively at age six. I swam through college and achieved a peak ranking of #8 in the 50 free at Nationals—the culmination of thirteen years of 6am practices, which I don't regret and would not do again.</p>
+        <p class="about-para">Before Williams, I grew up in New Jersey, where I went to The Pingry School in Basking Ridge and started swimming competitively at age six. I swam through college and achieved a peak ranking of #8 in the 50 free at Nationals—the culmination of thirteen years of 6am practices, which I don't regret and would not do again.</p>
+    </main>
 </div>
 
 <button id="bug-btn"   class="retro-btn">bug</button>

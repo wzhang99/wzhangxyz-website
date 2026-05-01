@@ -8,6 +8,14 @@ body {
     user-select: none;
 }
 
+/* ── Centered container ─────────────────── */
+.site-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 0 40px;
+    width: 100%;
+}
+
 /* ── Landing layout ─────────────────────── */
 body.is-landing {
     height: 100vh;
@@ -20,7 +28,6 @@ body.is-landing {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 80px;
 }
 
 .name { font-weight: bold; margin-bottom: 4px; }
@@ -37,11 +44,14 @@ body.is-interior {
     min-height: 100vh;
 }
 
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 48px 0 40px;
+}
+
 .site-name {
-    position: fixed;
-    left: 80px;
-    top: 50%;
-    transform: translateY(-50%);
     font-weight: bold;
     color: #fff;
     text-decoration: none;
@@ -50,17 +60,13 @@ body.is-interior {
 .site-name:hover { color: #777; }
 
 .page-nav {
-    position: fixed;
-    right: 80px;
-    top: 50%;
-    transform: translateY(-50%);
     text-align: right;
     line-height: 2;
     color: #777;
 }
 
 .page-content {
-    padding: 60px 400px 60px 300px;
+    padding-bottom: 80px;
     line-height: 2;
 }
 
@@ -190,7 +196,8 @@ body.placing #cursor-wrap { display: block; }
 
 /* ── Responsive ─────────────────────────── */
 @media (max-width: 600px) {
-    .landing { flex-direction: column; align-items: flex-start; gap: 40px; padding: 0 32px; }
+    .site-container { padding: 0 24px; }
+    .landing { flex-direction: column; align-items: flex-start; gap: 40px; }
     .landing-right { text-align: left; }
-    .page-content { padding: 40px 28px; }
+    .page-header { padding: 32px 0 28px; }
 }

@@ -4,31 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>William Zhang — Work</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="shared.css">
 </head>
-<body>
+<body class="is-interior">
 
-<header class="site-header">
-    <a href="index.html" class="site-title-link">WILLIAM ZHANG</a>
-    <nav class="site-nav">
-        <a href="about.html">ABOUT</a>
-    </nav>
-</header>
+<a href="index.html" class="site-name">William Zhang</a>
 
-<div class="main-container">
-    <nav class="left-nav">
-        <ul>
-            <li><a href="about.html">About</a></li>
-            <li><a href="writing.html">Writing</a></li>
-            <li><a href="reading.html">Reading</a></li>
-            <li><a href="work.html" class="active">Work</a></li>
-        </ul>
-    </nav>
-    <main class="content-area">
-        <h1>Work</h1>
-        <p>Coming soon.</p>
-    </main>
+<div class="page-nav">
+    <a href="about.html">about</a> &nbsp;·&nbsp;
+    <a href="work.html">work</a> &nbsp;·&nbsp;
+    <span class="nav-dropdown">
+        <span class="nav-trigger">side quests</span>
+        <div class="nav-dropdown-menu">
+            <a href="reading.html">reading</a>
+            <a href="writing.html">writing</a>
+            <a href="thoughts.html">thoughts</a>
+            <a href="activities.html">activities</a>
+        </div>
+    </span>
 </div>
 
+<div class="page-content">
+    <div class="page-title">work</div>
+</div>
+
+<button id="bug-btn"   class="retro-btn">bug</button>
+<button id="clear-btn" class="retro-btn">clear</button>
+
+<div id="cursor-wrap">
+    <div id="cursor-item"></div>
+    <div id="cursor-hand"></div>
+</div>
+
+<script src="sprite-engine.js"></script>
 </body>
 </html>

@@ -1,0 +1,196 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    user-select: none;
+}
+
+/* ── Landing layout ─────────────────────── */
+body.is-landing {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.landing {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 80px;
+}
+
+.name { font-weight: bold; margin-bottom: 4px; }
+.descriptor { color: #777; }
+
+.landing-right {
+    text-align: right;
+    line-height: 2;
+    color: #777;
+}
+
+/* ── Interior layout ────────────────────── */
+body.is-interior {
+    min-height: 100vh;
+}
+
+.site-name {
+    position: fixed;
+    left: 80px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    color: #fff;
+    text-decoration: none;
+}
+
+.site-name:hover { color: #777; }
+
+.page-nav {
+    position: fixed;
+    right: 80px;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: right;
+    line-height: 2;
+    color: #777;
+}
+
+.page-content {
+    padding: 60px 400px 60px 300px;
+    line-height: 2;
+}
+
+.page-title {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 24px;
+    color: #777;
+}
+
+/* ── Nav links ──────────────────────────── */
+.landing-right a, .page-nav a, .nav-trigger {
+    color: #5ecfca;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.landing-right a:hover, .page-nav a:hover { color: #8ddeda; }
+
+/* ── Dropdown nav ───────────────────────── */
+.nav-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-trigger { cursor: default; }
+
+.nav-dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    text-align: right;
+    line-height: 2;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+.nav-dropdown:hover .nav-dropdown-menu { display: block; }
+.nav-dropdown-menu a { display: block; }
+
+/* ── Buttons ────────────────────────────── */
+.retro-btn {
+    position: fixed;
+    bottom: 24px;
+    background: none;
+    border: none;
+    color: #777;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
+    letter-spacing: 0.04em;
+}
+
+.retro-btn:hover { color: #aaa; }
+.retro-btn.active { color: #5ecfca; }
+
+#bug-btn   { right: 28px; }
+#clear-btn { right: 68px; display: none; }
+#clear-btn.visible { display: block; }
+
+/* ── Custom cursor ──────────────────────── */
+body.placing, body.placing * { cursor: none; }
+
+#cursor-wrap {
+    position: fixed;
+    pointer-events: none;
+    display: none;
+    z-index: 9999;
+    transform: translate(-8px, -36px);
+}
+
+body.placing #cursor-wrap { display: block; }
+
+#cursor-hand {
+    display: block;
+    width: 53px;
+    height: 71px;
+    image-rendering: pixelated;
+    background-image: url('sprites/hand_spritesheet.svg');
+    background-repeat: no-repeat;
+    background-size: 111px 71px;
+    background-position: -58px 0;
+}
+
+#cursor-item {
+    position: absolute;
+    display: none;
+    image-rendering: pixelated;
+    pointer-events: none;
+    z-index: 1;
+}
+
+#cursor-hand { position: relative; z-index: 2; }
+
+/* ── Anteater spritesheet ──────────────── */
+.anteater-sprite {
+    width: 72px;
+    height: 48px;
+    image-rendering: pixelated;
+    background-image: url('sprites/anteater_spritesheet_small.svg');
+    background-size: 144px 48px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+}
+
+/* ── Bug spritesheet ───────────────────── */
+.bug-sprite {
+    width: 42px;
+    height: 24px;
+    image-rendering: pixelated;
+    background-image: url('sprites/bug_spritesheet_recolor.svg');
+    background-size: 177px 24px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+}
+
+/* ── On-screen sprites ──────────────────── */
+.bug, .anteater {
+    position: fixed;
+    pointer-events: none;
+    user-select: none;
+    transform-origin: center;
+    image-rendering: pixelated;
+}
+
+/* ── Responsive ─────────────────────────── */
+@media (max-width: 600px) {
+    .landing { flex-direction: column; align-items: flex-start; gap: 40px; padding: 0 32px; }
+    .landing-right { text-align: left; }
+    .page-content { padding: 40px 28px; }
+}

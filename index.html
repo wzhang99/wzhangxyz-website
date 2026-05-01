@@ -3,302 +3,385 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All the Way Down</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-
+    <title>William Zhang</title>
     <style>
-        /* Optional: Basic body styling */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            /* Changed font-family to include Arizona Serif and similar serifs */
-            font-family: "Arizona Serif", Georgia, 'Times New Roman', Times, serif;
-            line-height: 1.6;
-            color: #333; /* Dark grey text */
-            background-color: #ffffff; /* White background */
-            padding: 20px; /* Add some padding around the content */
+            background-color: #000;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            height: 100vh;
+            display: flex;
+            align-items: center;
         }
 
-        /* Custom styles for the table-like layout */
-        .item-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1.5fr; /* Adjust column widths as needed */
-            gap: 1rem; /* Gap between columns */
-            border-bottom: 1px solid #e5e7eb; /* Light grey border at the bottom of each row */
-            padding-bottom: 1rem;
-            margin-bottom: 1rem;
-        }
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .item-grid {
-                grid-template-columns: 1fr; /* Stack columns on smaller screens */
-                gap: 0.5rem;
-            }
-            .item-images {
-                justify-content: flex-start; /* Align images to the start on small screens */
-            }
-        }
-        /* Style for the clickable title */
-        .header-title-link {
-            text-decoration: none; /* Remove underline from the link */
-            color: inherit; /* Inherit color from parent */
-        }
-        /* Removed the hover underline effect */
-        /* .header-title-link:hover {
-            text-decoration: underline;
-        } */
-
-        /* Added styles based on previous screenshot replication */
-        body {
-            padding: 20px;
-        }
-
-        .site-header {
+        .landing {
+            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ddd;
+            padding: 0 60px;
         }
 
-        .site-title-link {
-            text-decoration: none;
-            color: inherit;
-        }
+        .name { font-weight: bold; margin-bottom: 4px; }
+        .descriptor { color: #777; }
 
-        .site-title {
-            font-size: 1.2em;
-            font-weight: 600;
-        }
-
-        .site-nav a {
-            margin-left: 20px;
-            text-decoration: none;
-            color: #666;
-        }
-
-        .site-nav a:hover {
-            color: #333;
-        }
-
-        .main-logo-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 40px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .site-logo {
-            width: 60px;
-            height: 60px;
-            background-color: #ccc;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2em;
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        .main-site-title {
-            font-size: 1.5em;
-            font-family: Georgia, 'Times New Roman', Times, serif;
-            letter-spacing: 0.2em;
-        }
-
-        .filter-nav {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            font-size: 0.9em;
-            font-weight: 600;
-        }
-
-        .filter-nav a {
-            margin: 0 10px;
-        }
-
-        .filter-link {
-            text-decoration: none;
-            color: #666;
-            padding-bottom: 5px;
-        }
-
-        .filter-link:hover {
-            color: #333;
-        }
-
-        .filter-link.active {
-            color: #333;
-            border-bottom: 2px solid #333;
-        }
-
-        .divider-line {
-            border-bottom: 1px solid #ddd;
-            width: 100%;
-            margin-bottom: 40px;
-        }
-
-        .content-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .item-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1.5fr;
-            gap: 20px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-        }
-
-        .item-title {
-            font-size: 1.1em;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .item-author {
-            font-size: 0.9em;
-            color: #555;
-            margin-bottom: 10px;
-        }
-
-        .item-meta {
-            font-size: 0.8em;
+        .landing-right {
+            text-align: right;
+            line-height: 2;
             color: #777;
-            margin-bottom: 3px;
         }
 
-        .item-type {
-            font-size: 0.9em;
-            color: #555;
+        .landing-right a {
+            color: #5ecfca;
+            text-decoration: underline;
+            text-underline-offset: 2px;
         }
 
-        .item-images {
-            display: flex;
-            justify-content: flex-end;
+        .landing-right a:hover { color: #8ddeda; }
+
+        /* ── Buttons ────────────────────────────── */
+        .retro-btn {
+            position: fixed;
+            bottom: 24px;
+            background: none;
+            border: none;
+            color: #444;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+            letter-spacing: 0.04em;
         }
 
-        .item-images img {
-            margin-left: 10px;
+        .retro-btn:hover { color: #777; }
+        .retro-btn.active { color: #5ecfca; }
+
+        #bug-btn   { right: 28px; }
+        #clear-btn { right: 68px; display: none; }
+        #clear-btn.visible { display: block; }
+
+        /* ── Custom cursor ──────────────────────── */
+        body.placing { cursor: none; }
+
+        #cursor-wrap {
+            position: fixed;
+            pointer-events: none;
+            display: none;
+            z-index: 9999;
+            /* offset: OK-circle centre aligns with mouse — tune if needed */
+            transform: translate(-26px, -53px);
         }
 
-        .item-image {
-            width: 50px;
-            height: auto;
-            object-fit: cover;
-            border: 1px solid #ddd;
-            border-radius: 3px;
+        body.placing #cursor-wrap { display: block; }
+
+        #cursor-hand {
+            display: block;
+            width: 53px;
+            height: 71px;
+            image-rendering: pixelated;
         }
 
-        /* Responsive adjustments for smaller screens */
-        @media (max-width: 768px) {
-            .item-row {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
+        #cursor-item {
+            position: absolute;
+            display: none;
+            image-rendering: pixelated;
+            pointer-events: none;
+        }
 
-            .item-images {
-                justify-content: flex-start;
-            }
+        /* ── On-screen bug (div with sprite sheet bg) ── */
+        .bug {
+            position: fixed;
+            pointer-events: none;
+            user-select: none;
+            transform-origin: center;
+            image-rendering: pixelated;
+            width: 19px;
+            height: 42px;
+            background-image: url('sprites/bug_sprite_isolated.png');
+            background-size: 76px 42px;   /* 4 frames × 19px each */
+            background-repeat: no-repeat;
+            background-position: 0 0;
+        }
 
-            .site-header {
-                flex-direction: column;
-                margin-bottom: 20px;
-            }
+        /* ── On-screen anteater ─────────────────── */
+        .anteater {
+            position: fixed;
+            pointer-events: none;
+            user-select: none;
+            transform-origin: center;
+            width: 100px;
+            height: 100px;
+        }
 
-            .site-nav {
-                margin-top: 15px;
-            }
+        .anteater img {
+            width: 100px;
+            height: 100px;
+            image-rendering: pixelated;
+            display: block;
+        }
 
-            .main-logo-section {
-                margin-bottom: 20px;
-            }
-
-            .divider-line {
-                margin-bottom: 20px;
-            }
+        @media (max-width: 600px) {
+            .landing { flex-direction: column; align-items: flex-start; gap: 40px; padding: 0 28px; }
+            .landing-right { text-align: left; }
         }
     </style>
 </head>
-<body class="p-4">
+<body>
 
-    <header class="flex justify-between items-center mb-8">
-        <a href="index.html" class="header-title-link">
-            <div class="text-lg font-semibold">ALL THE WAY DOWN</div>
-        </a>
-        <nav>
-            <a href="#" class="text-gray-600 hover:text-gray-900 mr-4">INFO</a>
-            <a href="#" class="text-gray-600 hover:text-gray-900">INSTAGRAM</a>
-        </nav>
-    </header>
-
-    <div class="flex flex-col items-center mb-8">
-        <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-2xl mb-4">
-            👁️
+<div class="landing">
+    <div class="landing-left">
+        <div>
+            <div class="name">William Zhang</div>
+            <div class="descriptor"><!-- tagline --></div>
         </div>
-        <div class="text-xl font-serif tracking-widest">it's me, william</div>
     </div>
-
-    <nav class="flex justify-center space-x-6 mb-8 text-sm font-semibold">
-        <a href="index.html" class="text-gray-900 border-b-2 border-gray-900 pb-1">VIEW ALL</a>
-        <a href="primary.html" class="text-gray-600 hover:text-gray-900 pb-1">PRIMARY</a>
-        <a href="secondary.html" class="text-gray-600 hover:text-gray-900 pb-1">SECONDARY</a>
-    </nav>
-
-    <div class="border-b border-gray-300 w-full mb-3"></div>
-
-    <div class="content-container">
-
-        <div class="item-grid">
-            <div class="item-details">
-                <h3 class="item-title">The Stranger</h3>
-                <p class="item-author">Albert Camus</p>
-                <p class="item-meta">Paperback : 123 pages</p>
-                <p class="item-meta">Publisher : Vintage International (August 11, 1989)</p>
-                <p class="item-meta">Language : English</p>
-                <p class="item-meta">ISBN-10 : 0679720200</p>
-                <p class="item-meta">ISBN-13 : 978-0679720201</p>
-            </div>
-
-            <div class="item-type">
-                1942, Fiction, Philosophy
-            </div>
-
-            <div class="flex space-x-2 item-images justify-end">
-                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book cover placeholder" class="item-image">
-                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spread placeholder" class="item-image">
-                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spine placeholder" class="item-image">
-            </div>
+    <div class="landing-right">
+        <div><!-- wzhang at wzhang dot xyz --></div>
+        <div>
+            <a href="about.html">about</a> &nbsp;·&nbsp;
+            <a href="writing.html">writing</a> &nbsp;·&nbsp;
+            <a href="reading.html">reading</a> &nbsp;·&nbsp;
+            <a href="work.html">work</a>
         </div>
+    </div>
+</div>
 
-        <div class="item-grid">
-            <div class="item-details">
-                <h3 class="item-title">Technological Slavery</h3>
-                <p class="item-author">Ted Kaczynski</p>
-                <p class="item-meta">Paperback : 421 pages</p>
-                <p class="item-meta">Publisher : Feral House ; 1st Edition (June 1, 2010)</p>
-                <p class="item-meta">Language : English</p>
-                <p class="item-meta">ISBN-10 : 1932595801</p>
-                <p class="item-meta">ISBN-13 : 978-1932595802</p>
-            </div>
+<button id="bug-btn"   class="retro-btn">bug</button>
+<button id="clear-btn" class="retro-btn">clear</button>
 
-            <div class="item-type">
-                2010, Non-fiction, Philosophy
-            </div>
+<div id="cursor-wrap">
+    <!-- carried item sits BEHIND the hand -->
+    <div id="cursor-item"></div>
+    <img id="cursor-hand" src="sprites/hand_sprite_pixelart.png" alt="">
+</div>
 
-            <div class="flex space-x-2 item-images justify-end">
-                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book cover placeholder" class="item-image">
-                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spread placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
-                <img src="https://placehold.co/50x70/e0e0e0/333?text=Img" alt="Book spine placeholder" class="w-12 h-auto object-cover border border-gray-200 rounded">
-            </div>
-        </div>
+<script>
+    // ── Config ───────────────────────────────────────────────────────
+    const BW = 19, BH = 42;     // bug: one frame at ~50% of native 37×83
+    const AW = 100, AH = 100;   // anteater: displayed at 100×100
 
-        </div>
+    // Bug sprite sheet: 149×83 → display 76×42 (bg-size)
+    // 4 frames, each 19px wide; offset = frame * BW
+    const BUG_NFRAMES = 4;
+
+    // ── State ────────────────────────────────────────────────────────
+    const bugs = [];
+    let anteater   = null;
+    let mode       = null;
+    let animTick   = 0;          // cycles 0..3 (10fps, 4-frame animation)
+    let anteaterSrc = 'sprites/anteater_sprite_pixelart.png';
+
+    // ── Strip white background from anteater WebP via canvas ─────────
+    // (works when served over HTTP; file:// may block canvas taint)
+    (function prepareAnteater() {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            try {
+                const c = document.createElement('canvas');
+                c.width = img.width; c.height = img.height;
+                const ctx = c.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                const d = ctx.getImageData(0, 0, c.width, c.height);
+                for (let i = 0; i < d.data.length; i += 4) {
+                    if (d.data[i] > 230 && d.data[i+1] > 230 && d.data[i+2] > 230)
+                        d.data[i+3] = 0;
+                }
+                ctx.putImageData(d, 0, 0);
+                anteaterSrc = c.toDataURL('image/png');
+                // Update any already-placed anteater images
+                document.querySelectorAll('.anteater img').forEach(el => el.src = anteaterSrc);
+            } catch(e) { /* file:// fallback: use original with white bg */ }
+        };
+        img.src = 'sprites/anteater_sprite_pixelart.png';
+    })();
+
+    // ── UI refs ──────────────────────────────────────────────────────
+    const bugBtn     = document.getElementById('bug-btn');
+    const clearBtn   = document.getElementById('clear-btn');
+    const cursorWrap = document.getElementById('cursor-wrap');
+    const cursorItem = document.getElementById('cursor-item');
+
+    // ── Cursor tracking ──────────────────────────────────────────────
+    document.addEventListener('mousemove', e => {
+        cursorWrap.style.left = e.clientX + 'px';
+        cursorWrap.style.top  = e.clientY + 'px';
+    });
+
+    // ── Button handlers ──────────────────────────────────────────────
+    bugBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (mode === 'bugs') {
+            mode = null;
+            bugBtn.classList.remove('active');
+            clearBtn.classList.remove('visible');
+            document.body.classList.remove('placing');
+        } else {
+            mode = 'bugs';
+            bugBtn.classList.add('active');
+            clearBtn.classList.add('visible');
+            document.body.classList.add('placing');
+        }
+        syncCursorItem();
+    });
+
+    clearBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        mode = anteater ? 'empty' : 'anteater';
+        bugBtn.classList.remove('active');
+        document.body.classList.add('placing');
+        syncCursorItem();
+    });
+
+    document.addEventListener('click', e => {
+        if (mode === 'bugs') {
+            spawnBug(e.clientX, e.clientY);
+        } else if (mode === 'anteater') {
+            placeAnteater(e.clientX, e.clientY);
+            mode = 'empty';
+            syncCursorItem();
+        }
+    });
+
+    // ── Cursor item sync ─────────────────────────────────────────────
+    function syncCursorItem() {
+        cursorItem.innerHTML = '';
+        if (mode === 'bugs') {
+            // Small bug held in hand (same sprite, smaller display)
+            const d = document.createElement('div');
+            d.style.cssText = `
+                width:${BW}px; height:${BH}px;
+                background-image:url('sprites/bug_sprite_isolated.png');
+                background-size:76px 42px;
+                background-repeat:no-repeat;
+                background-position:0 0;
+                image-rendering:pixelated;
+            `;
+            cursorItem.appendChild(d);
+            cursorItem.style.display = 'block';
+            cursorItem.style.left = '10px';
+            cursorItem.style.top  = '38px';
+        } else if (mode === 'anteater') {
+            const img = document.createElement('img');
+            img.src = anteaterSrc;
+            img.style.cssText = 'width:50px;height:50px;image-rendering:pixelated;display:block;';
+            cursorItem.appendChild(img);
+            cursorItem.style.display = 'block';
+            cursorItem.style.left = '-8px';
+            cursorItem.style.top  = '26px';
+        } else {
+            cursorItem.style.display = 'none';
+        }
+    }
+
+    // ── Spawn bug ────────────────────────────────────────────────────
+    function spawnBug(cx, cy) {
+        const x = Math.round(cx - BW / 2);
+        const y = Math.round(cy - BH / 2);
+        const el = document.createElement('div');
+        el.className = 'bug';
+        el.style.left = x + 'px';
+        el.style.top  = y + 'px';
+        document.body.appendChild(el);
+        bugs.push({
+            el, x, y,
+            angle: Math.random() * Math.PI * 2,
+            speed: 2,
+            state: 'walking',
+            timer: 15 + Math.floor(Math.random() * 20),
+        });
+    }
+
+    // ── Place anteater ───────────────────────────────────────────────
+    function placeAnteater(cx, cy) {
+        const x = Math.round(cx - AW / 2);
+        const y = Math.round(cy - AH / 2);
+        const wrap = document.createElement('span');
+        wrap.className = 'anteater';
+        wrap.style.left = x + 'px';
+        wrap.style.top  = y + 'px';
+        const img = document.createElement('img');
+        img.src = anteaterSrc;
+        wrap.appendChild(img);
+        document.body.appendChild(wrap);
+        anteater = { el: wrap, x, y, wanderAngle: Math.random() * Math.PI * 2 };
+    }
+
+    // ── 10fps tick ───────────────────────────────────────────────────
+    setInterval(tick, 100);
+
+    function tick() {
+        animTick = (animTick + 1) % BUG_NFRAMES;
+        const W = window.innerWidth, H = window.innerHeight;
+        const frameX = animTick * BW;   // bug sprite sheet x offset
+
+        for (const bug of bugs) {
+            if (bug.state === 'walking') {
+                bug.angle += (Math.random() - 0.5) * 0.15;
+                let nx = bug.x + Math.round(Math.cos(bug.angle) * bug.speed);
+                let ny = bug.y + Math.round(Math.sin(bug.angle) * bug.speed);
+                if (nx < 0)        { nx = 0;      bug.angle = Math.PI - bug.angle; }
+                else if (nx > W-BW){ nx = W-BW;   bug.angle = Math.PI - bug.angle; }
+                if (ny < 0)        { ny = 0;       bug.angle = -bug.angle; }
+                else if (ny > H-BH){ ny = H-BH;   bug.angle = -bug.angle; }
+                bug.x = nx; bug.y = ny;
+                bug.timer--;
+                if (bug.timer <= 0) { bug.state = 'stopped'; bug.timer = 8 + Math.floor(Math.random() * 15); }
+            } else {
+                bug.timer--;
+                if (bug.timer <= 0) {
+                    bug.state   = 'walking';
+                    bug.timer   = 15 + Math.floor(Math.random() * 20);
+                    bug.angle  += (Math.random() - 0.5) * Math.PI * 1.2;
+                }
+            }
+            const bx = bug.state === 'walking' ? frameX : 0;
+            bug.el.style.backgroundPosition = `-${bx}px 0px`;
+            bug.el.style.left      = bug.x + 'px';
+            bug.el.style.top       = bug.y + 'px';
+            bug.el.style.transform = `rotate(${bug.angle + Math.PI / 2}rad)`;
+        }
+
+        // Animate cursor bug frame too
+        if (mode === 'bugs') {
+            const d = cursorItem.querySelector('div');
+            if (d) d.style.backgroundPosition = `-${frameX}px 0px`;
+        }
+
+        if (anteater) {
+            let nearBug = null, nearDist = Infinity;
+            for (const b of bugs) {
+                const dx = (b.x + BW/2) - (anteater.x + AW/2);
+                const dy = (b.y + BH/2) - (anteater.y + AH/2);
+                const d  = Math.sqrt(dx*dx + dy*dy);
+                if (d < nearDist) { nearDist = d; nearBug = b; }
+            }
+            if (nearBug) {
+                const dx = (nearBug.x + BW/2) - (anteater.x + AW/2);
+                const dy = (nearBug.y + BH/2) - (anteater.y + AH/2);
+                anteater.wanderAngle = Math.atan2(dy, dx);
+                if (nearDist < 30) { nearBug.el.remove(); bugs.splice(bugs.indexOf(nearBug), 1); }
+            } else {
+                anteater.wanderAngle += (Math.random() - 0.5) * 0.2;
+            }
+            anteater.x = Math.round(anteater.x + Math.cos(anteater.wanderAngle));
+            anteater.y = Math.round(anteater.y + Math.sin(anteater.wanderAngle));
+            const aw = anteater.wanderAngle;
+            if (anteater.x < 0)       { anteater.x = 0;      anteater.wanderAngle = Math.PI - aw; }
+            if (anteater.x > W - AW)  { anteater.x = W - AW; anteater.wanderAngle = Math.PI - aw; }
+            if (anteater.y < 0)       { anteater.y = 0;       anteater.wanderAngle = -aw; }
+            if (anteater.y > H - AH)  { anteater.y = H - AH; anteater.wanderAngle = -aw; }
+            const facingRight = Math.cos(anteater.wanderAngle) > 0;
+            const bob = animTick % 2;   // 1px vertical bob at 5fps
+            anteater.el.style.left      = anteater.x + 'px';
+            anteater.el.style.top       = anteater.y + 'px';
+            anteater.el.style.transform = `scaleX(${facingRight ? -1 : 1}) translateY(${bob}px)`;
+        }
+    }
+</script>
 
 </body>
 </html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>William Zhang — Physics Thesis</title>
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        .thesis-container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 0 40px 80px;
+        }
+
+        .thesis-meta {
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 20px;
+        }
+
+        .viewer-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding-bottom: 16px;
+            color: #777;
+        }
+
+        .viewer-btn {
+            background: none;
+            border: none;
+            color: #777;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+            letter-spacing: 0.04em;
+        }
+
+        .viewer-btn:hover { color: #fff; }
+        .viewer-btn:disabled { color: #333; cursor: default; }
+
+        #page-info { color: #555; }
+
+        #pdf-canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body class="is-interior">
+
+<div class="thesis-container">
+    <header class="page-header">
+        <a href="index.html" class="site-name">William Zhang</a>
+        <nav class="page-nav">
+            <a href="about.html">about</a> &nbsp;·&nbsp;
+            <a href="work.html">work</a> &nbsp;·&nbsp;
+            <span class="nav-dropdown">
+                <span class="nav-trigger">side quests</span>
+                <div class="nav-dropdown-menu">
+                    <a href="reading.html">reading</a>
+                    <a href="writing.html">writing</a>
+                    <a href="thoughts.html">thoughts</a>
+                    <a href="activities.html">activities</a>
+                </div>
+            </span>
+        </nav>
+    </header>
+    <div class="page-title">physics honors thesis</div>
+    <div class="thesis-meta">Williams College &nbsp;·&nbsp; 2022</div>
+
+    <div class="viewer-controls">
+        <button class="viewer-btn" id="prev">← prev</button>
+        <span id="page-info">loading...</span>
+        <button class="viewer-btn" id="next">next →</button>
+    </div>
+
+    <canvas id="pdf-canvas"></canvas>
+</div>
+
+<button id="bug-btn"   class="retro-btn">bug</button>
+<button id="clear-btn" class="retro-btn">clear</button>
+
+<div id="cursor-wrap">
+    <div id="cursor-item"></div>
+    <div id="cursor-hand"></div>
+</div>
+
+<script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+
+    const pdfUrl   = 'content%20-%20writing/2022_Zhang_William_Physics_Thesis.pdf';
+    const canvas   = document.getElementById('pdf-canvas');
+    const ctx      = canvas.getContext('2d');
+    const prevBtn  = document.getElementById('prev');
+    const nextBtn  = document.getElementById('next');
+    const pageInfo = document.getElementById('page-info');
+
+    let pdfDoc      = null;
+    let currentPage = 1;
+    let rendering   = false;
+
+    async function renderPage(num) {
+        rendering = true;
+        const page = await pdfDoc.getPage(num);
+        const dpr  = window.devicePixelRatio || 1;
+        const containerWidth = canvas.parentElement.clientWidth;
+        const baseViewport   = page.getViewport({ scale: 1 });
+        const scale          = (containerWidth / baseViewport.width) * dpr;
+        const viewport       = page.getViewport({ scale });
+
+        canvas.width  = viewport.width;
+        canvas.height = viewport.height;
+        canvas.style.width  = (viewport.width  / dpr) + 'px';
+        canvas.style.height = (viewport.height / dpr) + 'px';
+
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        rendering = false;
+        updateControls();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateControls() {
+        pageInfo.textContent  = `page ${currentPage} of ${pdfDoc.numPages}`;
+        prevBtn.disabled = currentPage <= 1;
+        nextBtn.disabled = currentPage >= pdfDoc.numPages;
+    }
+
+    prevBtn.addEventListener('click', () => {
+        if (currentPage > 1 && !rendering) { currentPage--; renderPage(currentPage); }
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (currentPage < pdfDoc.numPages && !rendering) { currentPage++; renderPage(currentPage); }
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowLeft')  prevBtn.click();
+        if (e.key === 'ArrowRight') nextBtn.click();
+    });
+
+    pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+        pdfDoc = pdf;
+        renderPage(1);
+    });
+</script>
+
+<script src="sprite-engine.js"></script>
+</body>
+</html>

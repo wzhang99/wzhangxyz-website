@@ -169,6 +169,18 @@
     return 2 * R * Math.asin(Math.sqrt(h));
   }
 
+  // Shrink the big readout so it always fits the screen width, whatever it says.
+  function fitReading() {
+    readingEl.style.fontSize = "";
+    var avail = document.documentElement.clientWidth - 24;
+    var w = readingEl.getBoundingClientRect().width;
+    if (w > avail && w > 0) {
+      var base = parseFloat(getComputedStyle(readingEl).fontSize);
+      readingEl.style.fontSize = Math.max(30, base * avail / w) + "px";
+    }
+  }
+  window.addEventListener("resize", fitReading);
+
   function onPosition(pos) {
     var lat = pos.coords.latitude, lon = pos.coords.longitude, acc = pos.coords.accuracy || 999;
     lastFixMs = Date.now();
@@ -192,6 +204,7 @@
     meta.innerHTML = "<b>" + lat.toFixed(5) + ", " + lon.toFixed(5) + "</b>"
       + (r.far ? "" : " &nbsp;·&nbsp; model st " + r.st.toFixed(1) + " · ave " + r.ave.toFixed(1))
       + "<br>walked <b>" + (totalMeters < 1000 ? Math.round(totalMeters) + " m" : (totalMeters / 1000).toFixed(2) + " km") + "</b>";
+    fitReading();
   }
 
   function onError(err) {

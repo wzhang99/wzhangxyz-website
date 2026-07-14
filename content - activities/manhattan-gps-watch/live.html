@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#0d0f12">
+<title>Manhattan GPS Watch — walk test</title>
+<style>
+  :root {
+    --bg: #0d0f12; --panel: #16191d; --ink: #f4f5f0; --muted: #8b9184;
+    --accent: #ff6a3d; --lcd: #a8b79a;
+    --ok: #4ade80; --warn: #fbbf24; --bad: #f87171;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink); overflow: hidden;
+    font-family: -apple-system, "Segoe UI", system-ui, Roboto, sans-serif;
+    font-variant-numeric: tabular-nums;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  #app { height: 100%; display: flex; flex-direction: column; }
+
+  /* status bar */
+  .status {
+    display: flex; align-items: center; gap: 9px; padding: 14px 18px;
+    font-size: 14px; color: var(--muted); border-bottom: 1px solid #23272c;
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--muted); flex: none; }
+  .dot.ok { background: var(--ok); } .dot.warn { background: var(--warn); } .dot.bad { background: var(--bad); }
+  .status .age { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+  /* main readout */
+  .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px; }
+  .reading {
+    font-weight: 800; letter-spacing: -0.02em; line-height: 0.95; text-align: center;
+    font-size: clamp(72px, 30vw, 190px); white-space: nowrap;
+  }
+  .reading .x { color: var(--accent); font-weight: 400; margin: 0 0.12em; }
+  .reading.suburbs { font-size: clamp(44px, 13vw, 96px); letter-spacing: 0; }
+  .caption { font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
+  .hood {
+    font-size: clamp(20px, 6vw, 30px); font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--lcd); text-align: center; min-height: 1.2em;
+  }
+
+  /* footer meta */
+  .meta { padding: 10px 18px 6px; font-size: 12.5px; color: var(--muted); text-align: center; line-height: 1.5; min-height: 2.6em; }
+  .meta b { color: #c9cdc2; font-weight: 600; }
+
+  /* start button / overlay */
+  .start {
+    position: fixed; inset: 0; background: var(--bg); z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 32px;
+    text-align: center;
+  }
+  .start h1 { font-size: 26px; margin: 0; font-weight: 800; }
+  .start p { margin: 0; max-width: 30ch; color: var(--muted); line-height: 1.5; font-size: 15px; }
+  .start button, .retry {
+    font: inherit; font-weight: 700; font-size: 19px; color: #fff; background: var(--accent);
+    border: none; border-radius: 14px; padding: 18px 40px; cursor: pointer;
+  }
+  .start button:active { transform: translateY(1px); }
+  .hidden { display: none !important; }
+  .err { color: var(--bad); font-size: 14px; max-width: 32ch; line-height: 1.5; }
+  .brand { position: fixed; bottom: calc(8px + env(safe-area-inset-bottom)); left: 0; right: 0; text-align: center;
+           font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #3a3f45; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="status">
+    <span class="dot" id="dot"></span>
+    <span id="statusText">waiting for GPS…</span>
+    <span class="age" id="age"></span>
+  </div>
+  <div class="main">
+    <div class="reading" id="reading">— <span class="x">×</span> —</div>
+    <div class="caption" id="caption">street × avenue</div>
+    <div class="hood" id="hood"></div>
+  </div>
+  <div class="meta" id="meta"></div>
+</div>
+
+<div class="start" id="startScreen">
+  <h1>Manhattan GPS Watch<br>walk test</h1>
+  <p>Point this at the sky and start walking. It reads your cross streets from live GPS —
+     check it against the street signs. Works best outdoors, away from tall buildings.</p>
+  <button id="startBtn">Start GPS</button>
+  <p class="err hidden" id="startErr"></p>
+</div>
+<div class="brand">GPS · NYC · prototype</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ================= MODEL (identical to the watch demo) =================
+  var LON0 = -73.98, LAT0 = 40.75;
+  var AVE = { c0: 4.188413, cLon: -262.756538, cLat: 186.469600 };
+  var ST  = { c0: 38.164640, cLon: 508.387196, cLat: 1202.522281 };
+  var STQ = [38.232255, 512.711522, 1219.036290, -449.256796, -215.417273];
+  var HOUSTON = 0.0, AVE_A = 0.66, LETTER_SPACING = 0.80;
+
+  var LAND_OUTLINE = [[-74.01934, 40.70608], [-74.0189, 40.70474], [-74.01812, 40.70455], [-74.01747, 40.7047], [-74.01867, 40.70444], [-74.01844, 40.70417], [-74.01785, 40.70425], [-74.01796, 40.70399], [-74.01782, 40.70395], [-74.0178, 40.70424], [-74.01757, 40.70419], [-74.01767, 40.70362], [-74.01787, 40.70355], [-74.01766, 40.7036], [-74.01741, 40.70303], [-74.01652, 40.70203], [-74.01514, 40.70085], [-74.01503, 40.701], [-74.0141, 40.70056], [-74.01395, 40.70101], [-74.01359, 40.70096], [-74.01368, 40.70013], [-74.01348, 40.70051], [-74.01329, 40.70053], [-74.01307, 40.69978], [-74.01313, 40.70054], [-74.01291, 40.70056], [-74.01261, 40.70012], [-74.0126, 40.70062], [-74.0124, 40.70066], [-74.01216, 40.70019], [-74.01189, 40.70008], [-74.01247, 40.70115], [-74.0123, 40.70119], [-74.01219, 40.70066], [-74.01186, 40.70075], [-74.01168, 40.70046], [-74.01172, 40.70078], [-74.01151, 40.70083], [-74.01135, 40.70057], [-74.01136, 40.70086], [-74.01116, 40.70091], [-74.01079, 40.70019], [-74.01129, 40.70125], [-74.01112, 40.70129], [-74.01119, 40.70146], [-74.00913, 40.70199], [-74.00333, 40.70564], [-74.00217, 40.7046], [-74.00197, 40.70473], [-74.0027, 40.70546], [-74.00258, 40.70553], [-74.00207, 40.70542], [-74.00146, 40.70486], [-74.00116, 40.70507], [-74.00127, 40.70517], [-74.00059, 40.70543], [-74.00141, 40.70618], [-74.00099, 40.70642], [-74.00142, 40.70687], [-73.99811, 40.70853], [-73.98842, 40.71001], [-73.98863, 40.70986], [-73.98842, 40.70914], [-73.98125, 40.70984], [-73.9813, 40.71023], [-73.97796, 40.71059], [-73.97645, 40.7119], [-73.9747, 40.71556], [-73.97348, 40.71889], [-73.97312, 40.72015], [-73.97328, 40.72037], [-73.97321, 40.72075], [-73.97293, 40.72094], [-73.97154, 40.72718], [-73.97151, 40.72739], [-73.97167, 40.72743], [-73.97149, 40.72926], [-73.97191, 40.72994], [-73.97343, 40.7313], [-73.97445, 40.73532], [-73.97354, 40.73494], [-73.97328, 40.73514], [-73.97452, 40.73562], [-73.97452, 40.73605], [-73.97443, 40.73642], [-73.97289, 40.73578], [-73.9725, 40.73579], [-73.97266, 40.73923], [-73.97222, 40.74031], [-73.97218, 40.7407], [-73.97231, 40.74072], [-73.97197, 40.74233], [-73.97175, 40.74266], [-73.9719, 40.74272], [-73.97121, 40.74378], [-73.97136, 40.74384], [-73.96895, 40.74653], [-73.966, 40.75031], [-73.96224, 40.75454], [-73.96051, 40.75611], [-73.9592, 40.75786], [-73.95442, 40.76219], [-73.94773, 40.76987], [-73.9463, 40.77139], [-73.94467, 40.77276], [-73.94288, 40.77477], [-73.94199, 40.77638], [-73.9421, 40.77697], [-73.94238, 40.77716], [-73.94265, 40.77812], [-73.94361, 40.78013], [-73.94388, 40.78127], [-73.94363, 40.78265], [-73.94323, 40.7833], [-73.93982, 40.78526], [-73.93814, 40.78718], [-73.93707, 40.78942], [-73.93583, 40.79109], [-73.93349, 40.79277], [-73.93019, 40.7946], [-73.92927, 40.79586], [-73.929, 40.79763], [-73.92904, 40.80109], [-73.92922, 40.80115], [-73.93004, 40.80308], [-73.92992, 40.8032], [-73.93031, 40.8038], [-73.93356, 40.80761], [-73.93412, 40.80866], [-73.93435, 40.80962], [-73.93388, 40.81402], [-73.93386, 40.81449], [-73.93402, 40.81449], [-73.93383, 40.81558], [-73.9338, 40.81847], [-73.93444, 40.82705], [-73.93517, 40.83288], [-73.93492, 40.83511], [-73.93091, 40.84251], [-73.92976, 40.84518], [-73.9247, 40.8525], [-73.92228, 40.85566], [-73.92238, 40.85657], [-73.92197, 40.85699], [-73.92159, 40.85709], [-73.92165, 40.85734], [-73.92106, 40.85776], [-73.92114, 40.85793], [-73.92085, 40.85794], [-73.92134, 40.85828], [-73.92138, 40.85877], [-73.9221, 40.85936], [-73.9214, 40.8605], [-73.92059, 40.85926], [-73.91951, 40.85878], [-73.91726, 40.86171], [-73.91536, 40.86317], [-73.91551, 40.86333], [-73.91518, 40.86367], [-73.9152, 40.86393], [-73.91583, 40.8641], [-73.91592, 40.86434], [-73.91392, 40.86475], [-73.91255, 40.86653], [-73.91274, 40.86661], [-73.91109, 40.869], [-73.91104, 40.86916], [-73.91148, 40.86947], [-73.91095, 40.86939], [-73.91073, 40.87096], [-73.91044, 40.87138], [-73.91054, 40.87216], [-73.91108, 40.87291], [-73.91183, 40.87353], [-73.91381, 40.87419], [-73.91545, 40.87456], [-73.91634, 40.87456], [-73.91812, 40.87384], [-73.91876, 40.87323], [-73.91928, 40.87367], [-73.91921, 40.87416], [-73.91888, 40.87466], [-73.92089, 40.87548], [-73.92119, 40.87511], [-73.92059, 40.8742], [-73.91998, 40.87385], [-73.91992, 40.87361], [-73.92006, 40.87326], [-73.92045, 40.87301], [-73.92126, 40.87308], [-73.92213, 40.87365], [-73.92259, 40.87435], [-73.92268, 40.87516], [-73.92237, 40.87645], [-73.9225, 40.87686], [-73.92325, 40.87726], [-73.92472, 40.87745], [-73.92604, 40.87705], [-73.92642, 40.87718], [-73.92628, 40.87751], [-73.92655, 40.8776], [-73.92739, 40.8768], [-73.92806, 40.87659], [-73.92899, 40.87579], [-73.93016, 40.87409], [-73.93196, 40.87105], [-73.93222, 40.87001], [-73.93203, 40.86956], [-73.9326, 40.86898], [-73.93234, 40.86893], [-73.93226, 40.86868], [-73.93245, 40.86753], [-73.93748, 40.86013], [-73.93825, 40.8594], [-73.93914, 40.858], [-73.94022, 40.85678], [-73.94209, 40.85361], [-73.94344, 40.85231], [-73.94434, 40.85186], [-73.94468, 40.85193], [-73.9457, 40.85116], [-73.94612, 40.85119], [-73.94629, 40.85085], [-73.94649, 40.85099], [-73.94681, 40.85068], [-73.94706, 40.85023], [-73.94668, 40.84894], [-73.94684, 40.84702], [-73.94634, 40.84625], [-73.94655, 40.84601], [-73.94631, 40.84569], [-73.9461, 40.84387], [-73.94853, 40.83962], [-73.9495, 40.83703], [-73.94954, 40.83684], [-73.94932, 40.83671], [-73.94958, 40.83657], [-73.95013, 40.83447], [-73.95106, 40.83295], [-73.95456, 40.82787], [-73.95469, 40.82793], [-73.95501, 40.82746], [-73.95632, 40.82796], [-73.95697, 40.82702], [-73.95728, 40.82714], [-73.95959, 40.82364], [-73.95815, 40.82302], [-73.95823, 40.8229], [-73.95795, 40.82278], [-73.95818, 40.82237], [-73.95968, 40.82046], [-73.96043, 40.81995], [-73.9644, 40.81541], [-73.96889, 40.80871], [-73.97222, 40.80429], [-73.98794, 40.78183], [-73.98892, 40.78023], [-73.98887, 40.7797], [-73.99039, 40.77758], [-73.99093, 40.77756], [-73.99241, 40.77553], [-73.99251, 40.77498], [-73.99369, 40.77356], [-73.99389, 40.77296], [-73.99708, 40.76874], [-73.99625, 40.76839], [-73.99839, 40.76524], [-73.99963, 40.76357], [-73.99992, 40.7634], [-74.00073, 40.76375], [-74.00368, 40.75971], [-74.00523, 40.75724], [-74.00543, 40.75732], [-74.00762, 40.75429], [-74.00961, 40.74905], [-74.00808, 40.7484], [-74.00927, 40.74231], [-74.00967, 40.74131], [-74.00954, 40.74126], [-74.00969, 40.7406], [-74.01147, 40.74069], [-74.01161, 40.73928], [-74.01037, 40.73921], [-74.01087, 40.7336], [-74.01072, 40.73347], [-74.0109, 40.73335], [-74.01156, 40.7264], [-74.01322, 40.71832], [-74.01671, 40.71863], [-74.01773, 40.71309], [-74.01758, 40.71361], [-74.01633, 40.71341], [-74.01662, 40.7128], [-74.01663, 40.71217], [-74.01781, 40.71235], [-74.01778, 40.71284], [-74.01886, 40.70803], [-74.01818, 40.70783], [-74.01854, 40.70691], [-74.01885, 40.70698], [-74.01864, 40.70714], [-74.01912, 40.70698], [-74.01934, 40.70608]];
+
+  function toGrid(lat, lon) {
+    var dlon = lon - LON0, dlat = lat - LAT0;
+    var stLin = ST.c0 + ST.cLon * dlon + ST.cLat * dlat;
+    var stQ = STQ[0] + STQ[1] * dlon + STQ[2] * dlat + STQ[3] * dlat * dlat + STQ[4] * dlon * dlat;
+    var corr = Math.max(-0.8, Math.min(0.8, stQ - stLin));
+    return { ave: AVE.c0 + AVE.cLon * dlon + AVE.cLat * dlat, st: stLin + corr };
+  }
+  function pointInManhattan(lat, lon) {
+    var inside = false, n = LAND_OUTLINE.length, j = n - 1;
+    for (var i = 0; i < n; i++) {
+      var xi = LAND_OUTLINE[i][0], yi = LAND_OUTLINE[i][1];
+      var xj = LAND_OUTLINE[j][0], yj = LAND_OUTLINE[j][1];
+      if (((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)) inside = !inside;
+      j = i;
+    }
+    return inside;
+  }
+  function labelStreet(st) { return st < HOUSTON + 0.5 ? st + 1 : st; }
+  function aveLetter(ave) { var i = Math.round((AVE_A - ave) / LETTER_SPACING); return (i >= 0 && i <= 3) ? "ABCD".charAt(i) : null; }
+  function d1(x) { x = Math.round(x * 2) / 2; if (x === 0) x = 0; return (x % 1 === 0) ? String(x) : x.toFixed(1); }
+  function reading(lat, lon) {
+    if (!pointInManhattan(lat, lon)) return { far: true };
+    var g = toGrid(lat, lon), aveTxt;
+    if (g.st >= -0.5 && g.st < 14.0 && g.ave < 0.83) { var L = aveLetter(g.ave); aveTxt = L ? L : d1(g.ave); }
+    else aveTxt = d1(g.ave);
+    return { far: false, stTxt: d1(labelStreet(g.st)), aveTxt: aveTxt, ave: g.ave, st: g.st, hood: neighborhood(g.ave, g.st) };
+  }
+  var HOODS = [
+    ["Battery Park City",-40,-12,7.5,13],["Financial District",-40,-19,0,7.5],
+    ["Two Bridges",-24,-12,-2.8,1.6],["Tribeca",-20,-6,5.3,12],
+    ["Civic Center",-20,-9,3.5,5.3],["Lower East Side",-16,-0.5,-2.8,2.0],
+    ["Little Italy",-6,-1,4.2,5.1],["Chinatown",-16,-2,2.0,4.5],
+    ["Nolita",-3,1.5,3,5],["Hudson Square",-8,1.5,7.3,10],
+    ["SoHo",-14,1.5,5.1,7.3],["Alphabet City",-0.5,14,-2.8,0.83],
+    ["Meatpacking District",10,17,8.3,11],["West Village",0,14,6.8,11],
+    ["Greenwich Village",1.5,14,4.3,6.8],["East Village",-1,11,0.83,4.3],
+    ["Union Square",13,18,3.8,5.6],["Stuyvesant Town",13,23,-2.8,1.1],
+    ["Flatiron District",18,28,4.4,7],["Gramercy Park",13,23,1.1,4.4],
+    ["Chelsea",12,30,7,11],["NoMad",25,32,4.4,7],
+    ["Kips Bay",22,34,1,4.4],["Hudson Yards",30,42,9,12],
+    ["Murray Hill",32,42,2,5],["Garment District",33,42,6,8.5],
+    ["Times Square",42,50,6,8],["Hell's Kitchen",41,59,8,12],
+    ["Midtown East",42,56,1,5],
+    ["Lincoln Square",59,72,8,11],["Upper West Side",72,97,8,11],
+    ["Manhattan Valley",97,110,8,10.5],["Carnegie Hill",85,99,3.4,5.4],
+    ["Yorkville",76,97,-1,3.6],["Lenox Hill",59,77,-1,5.4],
+    ["Upper East Side",59,97,-1,5.4],["Central Park",59,110,5,8],["Morningside Heights",108,125,8,11],
+    ["East Harlem",96,142,-1,4],["Harlem",110,148,4,9],
+    ["Hamilton Heights",135,158,7.5,11],["Washington Heights",155,193,-1,13],
+    ["Inwood",193,226,-1,13],
+    ["Lower Manhattan",-50,14,-8,15],["Midtown",14,59,-8,15],["Uptown",59,240,-8,15]
+  ];
+  function neighborhood(ave, st) {
+    for (var i = 0; i < HOODS.length; i++) { var h = HOODS[i]; if (st >= h[1] && st < h[2] && ave >= h[3] && ave < h[4]) return h[0]; }
+    return "";
+  }
+
+  // ================= GPS + UI =================
+  var readingEl = document.getElementById("reading"), captionEl = document.getElementById("caption"),
+      hoodEl = document.getElementById("hood"), dot = document.getElementById("dot"),
+      statusText = document.getElementById("statusText"), ageEl = document.getElementById("age"),
+      meta = document.getElementById("meta");
+  var lastFixMs = 0, watchId = null, wakeLock = null, totalMeters = 0, prev = null;
+
+  function haversine(a, b) {
+    var R = 6371000, toRad = Math.PI / 180;
+    var dLa = (b.lat - a.lat) * toRad, dLo = (b.lon - a.lon) * toRad;
+    var la1 = a.lat * toRad, la2 = b.lat * toRad;
+    var h = Math.sin(dLa / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLo / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  function onPosition(pos) {
+    var lat = pos.coords.latitude, lon = pos.coords.longitude, acc = pos.coords.accuracy || 999;
+    lastFixMs = Date.now();
+    var r = reading(lat, lon);
+    if (r.far) {
+      readingEl.className = "reading suburbs"; readingEl.textContent = "THE SUBURBS";
+      captionEl.textContent = "not manhattan"; hoodEl.textContent = "";
+    } else {
+      readingEl.className = "reading";
+      readingEl.innerHTML = r.stTxt + ' <span class="x">×</span> ' + r.aveTxt;
+      captionEl.textContent = "street × avenue"; hoodEl.textContent = r.hood || "";
+    }
+    // signal quality
+    var q = acc <= 15 ? "ok" : acc <= 40 ? "warn" : "bad";
+    dot.className = "dot " + q;
+    statusText.textContent = "GPS ±" + Math.round(acc) + " m" + (acc > 40 ? " · weak, seek open sky" : "");
+    // distance walked
+    var here = { lat: lat, lon: lon };
+    if (prev) totalMeters += haversine(prev, here);
+    prev = here;
+    meta.innerHTML = "<b>" + lat.toFixed(5) + ", " + lon.toFixed(5) + "</b>"
+      + (r.far ? "" : " &nbsp;·&nbsp; model st " + r.st.toFixed(1) + " · ave " + r.ave.toFixed(1))
+      + "<br>walked <b>" + (totalMeters < 1000 ? Math.round(totalMeters) + " m" : (totalMeters / 1000).toFixed(2) + " km") + "</b>";
+  }
+
+  function onError(err) {
+    dot.className = "dot bad";
+    var msg = err.code === 1 ? "Location permission denied. Enable it for this site in your browser settings, then reload."
+            : err.code === 2 ? "Position unavailable — move to open sky and wait a moment."
+            : "GPS timed out — retrying…";
+    statusText.textContent = msg;
+  }
+
+  function tickAge() {
+    if (!lastFixMs) { ageEl.textContent = ""; return; }
+    var s = Math.round((Date.now() - lastFixMs) / 1000);
+    ageEl.textContent = s < 2 ? "just now" : s + "s ago";
+    if (s > 8) dot.className = "dot warn";
+  }
+  setInterval(tickAge, 1000);
+
+  async function keepAwake() {
+    try { if ("wakeLock" in navigator) { wakeLock = await navigator.wakeLock.request("screen"); } } catch (e) {}
+  }
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") keepAwake(); });
+
+  function start() {
+    if (!("geolocation" in navigator)) {
+      document.getElementById("startErr").textContent = "This browser has no geolocation support.";
+      document.getElementById("startErr").classList.remove("hidden");
+      return;
+    }
+    document.getElementById("startScreen").classList.add("hidden");
+    statusText.textContent = "acquiring GPS…";
+    keepAwake();
+    watchId = navigator.geolocation.watchPosition(onPosition, onError,
+      { enableHighAccuracy: true, maximumAge: 1500, timeout: 20000 });
+  }
+  document.getElementById("startBtn").addEventListener("click", start);
+})();
+</script>
+</body>
+</html>

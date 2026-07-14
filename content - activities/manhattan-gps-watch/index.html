@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>William Zhang — Manhattan GPS Watch</title>
+    <link rel="stylesheet" href="../../shared.css">
+    <style>
+        .watch-desc { max-width: 62ch; }
+        .watch-desc p { margin-bottom: 1em; }
+        .watch-reading { color: #5ecfca; }
+        .watch-links { margin: 1.8em 0 0; }
+        .watch-links a {
+            display: block;
+            color: #5ecfca;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            margin-bottom: 0.5em;
+        }
+        .watch-links a:hover { color: #8ddeda; }
+        .watch-links .hint { color: #777; }
+        .watch-note { color: #777; margin-top: 1.8em; max-width: 62ch; }
+    </style>
+</head>
+<body class="is-interior">
+
+<div class="site-container">
+    <header class="page-header">
+        <a href="../../index.html" class="site-name">William Zhang</a>
+        <nav class="page-nav">
+            <a href="../../about.html">about</a> &nbsp;·&nbsp;
+            <a href="../../work.html">work</a> &nbsp;·&nbsp;
+            <span class="nav-dropdown">
+                <span class="nav-trigger">side quests</span>
+                <div class="nav-dropdown-menu">
+                    <a href="../../reading.html">reading</a>
+                    <a href="../../writing.html">writing</a>
+                    <a href="../../thoughts.html">thoughts</a>
+                    <a href="../../activities.html">activities</a>
+                </div>
+            </span>
+        </nav>
+    </header>
+
+    <main class="page-content">
+        <div class="page-title">manhattan gps watch</div>
+
+        <div class="watch-desc">
+            <p>A watch project. The idea: a Casio F-91W, but with GPS, that tells you
+               which Manhattan cross streets you're standing between instead of just the
+               time. Stand at 72nd and 5th and it reads <span class="watch-reading">72 &times; 5</span>.</p>
+
+            <p>This is the software half, proven before any soldering. A small grid model
+               turns a raw GPS coordinate into a Manhattan cross street, names your
+               neighborhood, switches Alphabet City over to letters, counts into the
+               negatives below Houston, and reads THE SUBURBS the moment you leave the
+               island. No map data, no internet, no server.</p>
+        </div>
+
+        <div class="watch-links">
+            <a href="demo.html">&rarr; interactive map <span class="hint">(drag a pin anywhere in Manhattan)</span></a>
+            <a href="live.html">&rarr; live GPS <span class="hint">(open on your phone in NYC and walk around)</span></a>
+        </div>
+
+        <div class="watch-note">Next step: get it running on a real chip.</div>
+    </main>
+</div>
+
+<button id="bug-btn"   class="retro-btn">bug</button>
+<button id="clear-btn" class="retro-btn">clear</button>
+
+<div id="cursor-wrap">
+    <div id="cursor-item"></div>
+    <div id="cursor-hand"></div>
+</div>
+
+<script src="../../sprite-engine.js"></script>
+</body>
+</html>

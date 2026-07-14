@@ -82,13 +82,6 @@
   <div class="meta" id="meta"></div>
 </div>
 
-<div class="start" id="startScreen">
-  <h1>Manhattan GPS Watch<br>walk test</h1>
-  <p>Point this at the sky and start walking. It reads your cross streets from live GPS —
-     check it against the street signs. Works best outdoors, away from tall buildings.</p>
-  <button id="startBtn">Start GPS</button>
-  <p class="err hidden" id="startErr"></p>
-</div>
 <div class="brand">GPS · NYC · prototype</div>
 
 <script>
@@ -224,17 +217,18 @@
 
   function start() {
     if (!("geolocation" in navigator)) {
-      document.getElementById("startErr").textContent = "This browser has no geolocation support.";
-      document.getElementById("startErr").classList.remove("hidden");
+      dot.className = "dot bad";
+      statusText.textContent = "this browser has no GPS support";
       return;
     }
-    document.getElementById("startScreen").classList.add("hidden");
     statusText.textContent = "acquiring GPS…";
     keepAwake();
     watchId = navigator.geolocation.watchPosition(onPosition, onError,
       { enableHighAccuracy: true, maximumAge: 1500, timeout: 20000 });
   }
-  document.getElementById("startBtn").addEventListener("click", start);
+  // wake-lock needs a gesture, so grab it on first touch; GPS starts immediately
+  document.addEventListener("pointerdown", function once() { keepAwake(); document.removeEventListener("pointerdown", once); });
+  start();
 })();
 </script>
 </body>

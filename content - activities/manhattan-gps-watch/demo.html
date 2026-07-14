@@ -1,294 +1,154 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manhattan GPS Watch — interactive concept</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manhattan GPS Watch — live map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin="" />
 <style>
   :root {
-    --bg: #e6e3da; --panel: #f4f2ec; --panel-2: #eeebe2;
-    --ink: #23261f; --muted: #6c7062; --line: #d4d1c4;
-    --accent: #c1432a; --accent-ink: #fff;
-    --water: #ccd4d7; --land: #e9e6db; --grid: #c6c2b3; --coast: #a7a394;
-    --shadow: rgba(40,42,34,.18);
-    /* Watch (constant across themes — it is a physical object) */
     --case: #34373b; --case-hi: #4b4f54; --case-lo: #212327;
     --lcd: #9dab8d; --lcd-2: #94a383; --lcd-ink: #191e13;
-    --lcd-dim: rgba(25,30,19,.30); --lcd-ghost: rgba(25,30,19,.09);
+    --lcd-dim: rgba(25,30,19,.30); --accent: #c1432a;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #141618; --panel: #1e2124; --panel-2: #24282b;
-      --ink: #e9eae3; --muted: #969c8b; --line: #2d3032;
-      --accent: #e0563b; --accent-ink: #fff;
-      --water: #1c2226; --land: #2a2d2b; --grid: #383c38; --coast: #4b504a;
-      --shadow: rgba(0,0,0,.45);
-    }
-  }
-  :root[data-theme="light"] {
-    --bg: #e6e3da; --panel: #f4f2ec; --panel-2: #eeebe2;
-    --ink: #23261f; --muted: #6c7062; --line: #d4d1c4;
-    --accent: #c1432a; --water: #ccd4d7; --land: #e9e6db;
-    --grid: #c6c2b3; --coast: #a7a394; --shadow: rgba(40,42,34,.18);
-  }
-  :root[data-theme="dark"] {
-    --bg: #141618; --panel: #1e2124; --panel-2: #24282b;
-    --ink: #e9eae3; --muted: #969c8b; --line: #2d3032;
-    --accent: #e0563b; --water: #1c2226; --land: #2a2d2b;
-    --grid: #383c38; --coast: #4b504a; --shadow: rgba(0,0,0,.45);
-  }
-
   * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font-family: -apple-system, "Segoe UI", system-ui, Roboto, sans-serif;
-    line-height: 1.5; -webkit-font-smoothing: antialiased;
-  }
-  .wrap { max-width: 1060px; margin: 0 auto; padding: 32px 20px 64px; }
+  html, body { height: 100%; margin: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, Roboto, sans-serif; }
+  #map { position: absolute; inset: 0; z-index: 1; background: #aab; }
 
-  header { margin-bottom: 28px; }
-  .eyebrow {
-    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--accent); font-weight: 600; margin: 0 0 6px;
+  /* Floating watch HUD */
+  .hud {
+    position: absolute; z-index: 1000; top: 14px; right: 14px; width: 260px;
+    background: linear-gradient(150deg, var(--case-hi), var(--case) 42%, var(--case-lo));
+    border-radius: 22px; padding: 16px 15px 15px;
+    box-shadow: 0 10px 26px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.12);
+    color: #fff;
   }
-  h1 {
-    font-size: clamp(24px, 4vw, 34px); margin: 0 0 8px; font-weight: 700;
-    letter-spacing: -.01em; text-wrap: balance;
+  @media (max-width: 560px) {
+    .hud { top: auto; bottom: 10px; right: 10px; left: 10px; width: auto; }
   }
-  .sub { color: var(--muted); max-width: 60ch; margin: 0; }
-
-  .stage {
-    display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.05fr);
-    gap: 22px; margin-top: 26px; align-items: start;
-  }
-  @media (max-width: 760px) { .stage { grid-template-columns: 1fr; } }
-
-  .card {
-    background: var(--panel); border: 1px solid var(--line);
-    border-radius: 14px; padding: 16px;
-  }
-  .card h2 {
-    font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
-    color: var(--muted); margin: 0 0 12px; font-weight: 600;
-  }
-
-  /* ---- Map ---- */
-  #map { width: 100%; display: block; border-radius: 8px; cursor: crosshair;
-         touch-action: none; background: var(--water); }
-  .maphint { font-size: 12.5px; color: var(--muted); margin: 10px 2px 0; }
-
-  .presets { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
-  .chip {
-    font: inherit; font-size: 12.5px; padding: 5px 10px; cursor: pointer;
-    background: var(--panel-2); color: var(--ink);
-    border: 1px solid var(--line); border-radius: 999px;
-  }
-  .chip:hover { border-color: var(--accent); color: var(--accent); }
-  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-  /* ---- Watch ---- */
-  .watchwrap { display: flex; flex-direction: column; align-items: center; gap: 18px; }
-  .watch {
-    width: 300px; max-width: 100%; background:
-      linear-gradient(150deg, var(--case-hi), var(--case) 42%, var(--case-lo));
-    border-radius: 30px / 34px; padding: 30px 26px 26px;
-    box-shadow: 0 14px 30px var(--shadow), inset 0 1px 0 rgba(255,255,255,.12),
-                inset 0 -2px 6px rgba(0,0,0,.4);
-    position: relative;
-  }
-  .brand {
-    text-align: center; color: #cdd0d4; font-size: 10px; letter-spacing: .22em;
-    text-transform: uppercase; margin-bottom: 10px; opacity: .85;
-  }
+  .brand { text-align: center; color: #cdd0d4; font-size: 9px; letter-spacing: .22em;
+           text-transform: uppercase; margin-bottom: 8px; opacity: .85; }
   .lcd {
     background: linear-gradient(170deg, var(--lcd), var(--lcd-2));
-    border-radius: 8px; padding: 14px 14px 12px;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,.35), inset 0 0 0 1px rgba(0,0,0,.18);
-    color: var(--lcd-ink);
+    border-radius: 7px; padding: 11px 12px 10px; color: var(--lcd-ink);
     font-family: "DIN Alternate", ui-monospace, "Cascadia Mono", Consolas, monospace;
-    font-variant-numeric: tabular-nums;
-    position: relative; overflow: hidden;
+    font-variant-numeric: tabular-nums; position: relative; overflow: hidden;
   }
-  .lcd::after { /* subtle glass sheen */
-    content: ""; position: absolute; inset: 0;
-    background: linear-gradient(105deg, rgba(255,255,255,.16), transparent 38%);
-    pointer-events: none;
-  }
-  .lcd-top {
-    display: flex; justify-content: space-between; align-items: baseline;
-    font-size: 13px; letter-spacing: .04em; border-bottom: 1px solid var(--lcd-dim);
-    padding-bottom: 6px; margin-bottom: 8px;
-  }
-  .lcd-top .mode { font-weight: 700; letter-spacing: .12em; }
-  .compass { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; }
+  .lcd::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(105deg, rgba(255,255,255,.16), transparent 40%); pointer-events: none; }
+  .lcd-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px;
+             border-bottom: 1px solid var(--lcd-dim); padding-bottom: 5px; margin-bottom: 6px; }
+  .mode { font-weight: 700; letter-spacing: .1em; }
+  .compass { font-weight: 700; }
   .compass.off { opacity: .22; }
-  .needle { display: inline-block; transform-origin: 50% 50%; }
-  .hero { text-align: center; margin: 2px 0 4px; }
-  .hero .reading {
-    font-size: 37px; font-weight: 700; letter-spacing: .01em; line-height: 1.02;
-    white-space: nowrap;
-  }
-  .hero .reading .x { opacity: .5; margin: 0 3px; font-weight: 400; }
-  .hero .reading.toofar { font-size: 24px; letter-spacing: .04em; }
-  .hero .caption {
-    font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
-    color: var(--lcd-ink); opacity: .55; margin-top: 2px;
-  }
-  .hoodline {
-    text-align: center; font-size: 11px; font-weight: 700; letter-spacing: .13em;
+  .hero { text-align: center; margin: 1px 0 3px; }
+  .reading { font-size: 30px; font-weight: 700; line-height: 1.02; white-space: nowrap; }
+  .reading .x { opacity: .5; margin: 0 2px; font-weight: 400; }
+  .reading.toofar { font-size: 19px; letter-spacing: .04em; }
+  .caption { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; opacity: .55; margin-top: 1px; }
+  .hoodline { text-align: center; font-size: 10px; font-weight: 700; letter-spacing: .12em;
     text-transform: uppercase; color: var(--lcd-ink); opacity: .78;
-    border-top: 1px solid var(--lcd-dim); margin-top: 8px; padding-top: 7px;
-  }
-  .lcd-bot {
-    display: flex; justify-content: space-between; align-items: baseline;
-    border-top: 1px solid var(--lcd-dim); padding-top: 7px; margin-top: 8px;
-  }
-  .clock { font-size: 26px; font-weight: 700; letter-spacing: .02em; }
-  .clock .sec { font-size: 15px; opacity: .6; }
+    border-top: 1px solid var(--lcd-dim); margin-top: 6px; padding-top: 6px; }
+  .lcd-bot { display: flex; justify-content: space-between; align-items: baseline;
+             border-top: 1px solid var(--lcd-dim); padding-top: 6px; margin-top: 6px; }
+  .clock { font-size: 21px; font-weight: 700; }
+  .clock .sec { font-size: 12px; opacity: .6; }
   .colon.blink { animation: blink 1s steps(1) infinite; }
   @keyframes blink { 50% { opacity: .25; } }
   @media (prefers-reduced-motion: reduce) { .colon.blink { animation: none; } }
-  .fix { font-size: 11px; letter-spacing: .04em; opacity: .6; text-align: right; }
+  .fix { font-size: 10px; opacity: .6; text-align: right; }
 
-  .buttons { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-  .btn {
-    font: inherit; font-weight: 600; font-size: 13px; cursor: pointer;
-    padding: 9px 16px; border-radius: 9px; border: 1px solid var(--line);
-    background: var(--panel); color: var(--ink); display: inline-flex; gap: 7px; align-items: center;
+  .ctrls { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
+  .ctrls button {
+    font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; color: #e8e9e3;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16);
+    border-radius: 7px; padding: 6px 9px;
   }
-  .btn:hover { border-color: var(--accent); }
-  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-  .btn.primary:active { transform: translateY(1px); }
-  .btn.on { border-color: var(--accent); color: var(--accent); }
+  .ctrls button:hover { border-color: var(--accent); }
+  .ctrls button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .ctrls button.on { border-color: var(--accent); color: #fff; background: rgba(193,67,42,.35); }
+  .ctrls .row { display: flex; gap: 6px; width: 100%; }
+  .ctrls .row button { flex: 1; }
 
-  .toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
-  .toggle input { accent-color: var(--accent); width: 16px; height: 16px; }
-
-  /* ---- Readout / design notes ---- */
-  .readout {
-    margin-top: 22px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
-    background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+  /* Presets + info panel, bottom-left */
+  .panel {
+    position: absolute; z-index: 1000; bottom: 14px; left: 14px; max-width: 300px;
+    background: rgba(255,255,255,.94); border-radius: 12px; padding: 12px 13px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.25); font-size: 12.5px; color: #222;
   }
-  @media (max-width: 620px) { .readout { grid-template-columns: repeat(2,1fr); } }
-  .cell { background: var(--panel); padding: 12px 14px; }
-  .cell .k { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-  .cell .v { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 3px; }
-
-  .legend { margin-top: 26px; }
-  .legend h2 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
-  .legend ul { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 9px; }
-  .legend li { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: baseline; font-size: 14px; }
-  .legend .tag {
-    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-    color: var(--accent); padding-top: 1px;
+  @media (max-width: 560px) { .panel { display: none; } }
+  .panel h1 { font-size: 13px; margin: 0 0 3px; letter-spacing: -.01em; }
+  .panel p { margin: 0 0 9px; color: #555; line-height: 1.45; }
+  .panel .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .panel .chips button {
+    font: inherit; font-size: 11.5px; cursor: pointer; background: #f1efe9;
+    border: 1px solid #dcd8cf; border-radius: 999px; padding: 4px 9px; color: #333;
   }
-  .legend .d { color: var(--muted); }
-  footer { margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--line);
-           font-size: 12.5px; color: var(--muted); }
+  .panel .chips button:hover { border-color: var(--accent); color: var(--accent); }
+  .coords { margin-top: 9px; font-variant-numeric: tabular-nums; color: #444; font-size: 11.5px; }
+  .coords b { color: #222; }
 </style>
 </head>
 <body>
+<div id="map"></div>
 
-
-<div class="wrap">
-  <header>
-    <p class="eyebrow">Manhattan GPS Watch · working concept</p>
-    <h1>Drop yourself anywhere in Manhattan. Read the cross streets off the watch.</h1>
-    <p class="sub">Move the pin on the map — the watch computes which streets you're between using the
-      same grid math that will live in the firmware. No map data, no internet. Try the presets,
-      including one below Houston (negative streets) and one that's off the island.</p>
-  </header>
-
-  <div class="stage">
-    <!-- MAP -->
-    <section class="card" aria-label="Manhattan map">
-      <h2>Your location</h2>
-      <canvas id="map" aria-label="Stylized map of Manhattan; click or drag to move the location pin"></canvas>
-      <div class="presets" id="presets"></div>
-      <p class="maphint">Tap or drag anywhere on the island. The outline is Manhattan's <em>real coastline</em>
-        (from OpenStreetMap); the tilted grid and Central Park are drawn <em>from the watch's own model</em> —
-        so you're seeing exactly what it computes.</p>
-    </section>
-
-    <!-- WATCH -->
-    <section class="card" aria-label="Watch face">
-      <h2>The watch face</h2>
-      <div class="watchwrap">
-        <div class="watch" role="img" aria-label="Digital watch showing the cross-street reading">
-          <div class="brand">GPS · NYC</div>
-          <div class="lcd">
-            <div class="lcd-top">
-              <span class="mode" id="dateStr">TUE 7-13</span>
-              <span class="compass off" id="compass" aria-hidden="true">
-                <span class="needle">▲</span>N</span>
-            </div>
-            <div class="hero">
-              <div class="reading" id="reading"><span>23.5</span><span class="x">×</span><span>9</span></div>
-              <div class="caption" id="caption">street × avenue</div>
-            </div>
-            <div class="hoodline" id="hood">GREENWICH VILLAGE</div>
-            <div class="lcd-bot">
-              <span class="clock" id="clock">--<span class="colon blink">:</span>--<span class="sec">·--</span></span>
-              <span class="fix" id="fix">FIX now</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="buttons">
-          <button class="btn primary" id="refreshBtn" type="button">⟳ Refresh fix</button>
-          <button class="btn on" id="compassBtn" type="button" aria-pressed="true">Compass: ON</button>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="battery"> Battery-saver: update only on Refresh (like the real watch)
-        </label>
-      </div>
-    </section>
+<div class="hud">
+  <div class="brand">GPS · NYC</div>
+  <div class="lcd">
+    <div class="lcd-top">
+      <span class="mode" id="dateStr">--</span>
+      <span class="compass" id="compass"><span>▲</span>N</span>
+    </div>
+    <div class="hero">
+      <div class="reading" id="reading">—</div>
+      <div class="caption" id="caption">street × avenue</div>
+    </div>
+    <div class="hoodline" id="hood">—</div>
+    <div class="lcd-bot">
+      <span class="clock" id="clock">--<span class="colon blink">:</span>--<span class="sec">·--</span></span>
+      <span class="fix" id="fix">FIX now</span>
+    </div>
   </div>
-
-  <!-- READOUT for design review -->
-  <div class="readout" id="readout">
-    <div class="cell"><div class="k">Latitude</div><div class="v" id="oLat">—</div></div>
-    <div class="cell"><div class="k">Longitude</div><div class="v" id="oLon">—</div></div>
-    <div class="cell"><div class="k">Model street</div><div class="v" id="oSt">—</div></div>
-    <div class="cell"><div class="k">Model avenue</div><div class="v" id="oAve">—</div></div>
+  <div class="ctrls">
+    <div class="row">
+      <button class="primary" id="refreshBtn" type="button">⟳ Refresh</button>
+      <button class="on" id="compassBtn" type="button">Compass ON</button>
+    </div>
+    <div class="row">
+      <button id="gridBtn" type="button">Grid overlay</button>
+      <button id="batteryBtn" type="button">Battery-saver</button>
+    </div>
+    <div class="row">
+      <button id="locateBtn" type="button">📍 Locate me (real GPS)</button>
+    </div>
   </div>
-
-  <div class="legend card" style="margin-top:22px;">
-    <h2>What each part of the face is doing</h2>
-    <ul>
-      <li><span class="tag">Big line</span><span class="d">The signature readout — <strong>street × avenue</strong>, to the nearest half-block. <code>23.5 × 9</code> = between 23rd and 24th, by 9th Ave. Below Houston it counts down (<code>0</code>, <code>-1</code>, …). In <strong>Alphabet City</strong> the avenue shows as its letter: <code>7.5 × C</code>. Off the island it reads <code>THE SUBURBS</code>.</span></li>
-      <li><span class="tag">Neighborhood</span><span class="d">The line under the reading names your <strong>Manhattan neighborhood</strong>, inferred from the cross-street position (fuzzier downtown, where the grid model is weakest).</span></li>
-      <li><span class="tag">Top-left</span><span class="d">Day + date, Casio-style.</span></li>
-      <li><span class="tag">Top-right</span><span class="d">Compass. A single arrow to north, toggled on/off to save power (it's dimmed when off).</span></li>
-      <li><span class="tag">Bottom</span><span class="d">Time, and when the location was last fixed. In battery-saver mode the reading only updates when you press Refresh.</span></li>
-    </ul>
-  </div>
-
-  <footer id="modelnote">
-    Grid model fitted to 12 real street corners (OpenStreetMap) plus 8 landmark anchors, spanning the East
-    Village to Harlem. Cross-validated accuracy: <strong>streets ~0.3 blocks, avenues ~0.17 blocks</strong>
-    through the core of the island. The off-island boundary follows the <strong>real coastline</strong>
-    (point-in-polygon), so it's synced to the shoreline. Far downtown (below ~14th St) is extrapolated and
-    can be ~1 block off; the <strong>West Village</strong> in particular genuinely isn't a square grid (it
-    predates the 1811 plan), so readings there are approximate. A design + algorithm prototype, not firmware.
-  </footer>
 </div>
 
+<div class="panel">
+  <h1>Manhattan GPS Watch — live map</h1>
+  <p>Drag the pin (or click the map) anywhere. The watch reads the cross streets off the real map.
+    Turn on <b>Grid overlay</b> to see the model's streets/avenues laid over the actual ones.</p>
+  <div class="chips" id="presets"></div>
+  <div class="coords" id="coords">—</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
 <script>
 (function () {
   "use strict";
 
-  // ---- MODEL: (lon,lat) -> (avenue, street). ave/st = c0 + c1*dlon + c2*dlat.
-  // Fitted (refit.py) to 12 real OpenStreetMap corners + 8 landmark anchors.
-  // Leave-one-out accuracy: streets ~0.3 blocks, avenues ~0.17 blocks (core).
+  // ---- MODEL (same coefficients as the firmware model / refit.py) ----
   var LON0 = -73.98, LAT0 = 40.75;
   var AVE = { c0: 4.188413, cLon: -262.756538, cLat: 186.469600 };
   var ST  = { c0: 38.164640, cLon: 508.387196, cLat: 1202.522281 };
-  var AVE_MIN = 0.0, AVE_MAX = 12.5, ST_MIN = -40.0, ST_MAX = 225.0;
-  var HOUSTON = 0.0;
+  var AVE_MIN = 0.0, AVE_MAX = 12.5, ST_MIN = -40.0, ST_MAX = 225.0, HOUSTON = 0.0;
 
-  // Real Manhattan coastline, simplified from OpenStreetMap "Manhattan Island". [lon,lat].
+  // Real Manhattan coastline (OSM "Manhattan Island", simplified), [lon,lat].
   var LAND_OUTLINE = [[-74.01934, 40.70608], [-74.0189, 40.70474], [-74.01812, 40.70455], [-74.01747, 40.7047], [-74.01867, 40.70444], [-74.01844, 40.70417], [-74.01785, 40.70425], [-74.01796, 40.70399], [-74.01782, 40.70395], [-74.0178, 40.70424], [-74.01757, 40.70419], [-74.01767, 40.70362], [-74.01787, 40.70355], [-74.01766, 40.7036], [-74.01741, 40.70303], [-74.01652, 40.70203], [-74.01514, 40.70085], [-74.01503, 40.701], [-74.0141, 40.70056], [-74.01395, 40.70101], [-74.01359, 40.70096], [-74.01368, 40.70013], [-74.01348, 40.70051], [-74.01329, 40.70053], [-74.01307, 40.69978], [-74.01313, 40.70054], [-74.01291, 40.70056], [-74.01261, 40.70012], [-74.0126, 40.70062], [-74.0124, 40.70066], [-74.01216, 40.70019], [-74.01189, 40.70008], [-74.01247, 40.70115], [-74.0123, 40.70119], [-74.01219, 40.70066], [-74.01186, 40.70075], [-74.01168, 40.70046], [-74.01172, 40.70078], [-74.01151, 40.70083], [-74.01135, 40.70057], [-74.01136, 40.70086], [-74.01116, 40.70091], [-74.01079, 40.70019], [-74.01129, 40.70125], [-74.01112, 40.70129], [-74.01119, 40.70146], [-74.00913, 40.70199], [-74.00333, 40.70564], [-74.00217, 40.7046], [-74.00197, 40.70473], [-74.0027, 40.70546], [-74.00258, 40.70553], [-74.00207, 40.70542], [-74.00146, 40.70486], [-74.00116, 40.70507], [-74.00127, 40.70517], [-74.00059, 40.70543], [-74.00141, 40.70618], [-74.00099, 40.70642], [-74.00142, 40.70687], [-73.99811, 40.70853], [-73.98842, 40.71001], [-73.98863, 40.70986], [-73.98842, 40.70914], [-73.98125, 40.70984], [-73.9813, 40.71023], [-73.97796, 40.71059], [-73.97645, 40.7119], [-73.9747, 40.71556], [-73.97348, 40.71889], [-73.97312, 40.72015], [-73.97328, 40.72037], [-73.97321, 40.72075], [-73.97293, 40.72094], [-73.97154, 40.72718], [-73.97151, 40.72739], [-73.97167, 40.72743], [-73.97149, 40.72926], [-73.97191, 40.72994], [-73.97343, 40.7313], [-73.97445, 40.73532], [-73.97354, 40.73494], [-73.97328, 40.73514], [-73.97452, 40.73562], [-73.97452, 40.73605], [-73.97443, 40.73642], [-73.97289, 40.73578], [-73.9725, 40.73579], [-73.97266, 40.73923], [-73.97222, 40.74031], [-73.97218, 40.7407], [-73.97231, 40.74072], [-73.97197, 40.74233], [-73.97175, 40.74266], [-73.9719, 40.74272], [-73.97121, 40.74378], [-73.97136, 40.74384], [-73.96895, 40.74653], [-73.966, 40.75031], [-73.96224, 40.75454], [-73.96051, 40.75611], [-73.9592, 40.75786], [-73.95442, 40.76219], [-73.94773, 40.76987], [-73.9463, 40.77139], [-73.94467, 40.77276], [-73.94288, 40.77477], [-73.94199, 40.77638], [-73.9421, 40.77697], [-73.94238, 40.77716], [-73.94265, 40.77812], [-73.94361, 40.78013], [-73.94388, 40.78127], [-73.94363, 40.78265], [-73.94323, 40.7833], [-73.93982, 40.78526], [-73.93814, 40.78718], [-73.93707, 40.78942], [-73.93583, 40.79109], [-73.93349, 40.79277], [-73.93019, 40.7946], [-73.92927, 40.79586], [-73.929, 40.79763], [-73.92904, 40.80109], [-73.92922, 40.80115], [-73.93004, 40.80308], [-73.92992, 40.8032], [-73.93031, 40.8038], [-73.93356, 40.80761], [-73.93412, 40.80866], [-73.93435, 40.80962], [-73.93388, 40.81402], [-73.93386, 40.81449], [-73.93402, 40.81449], [-73.93383, 40.81558], [-73.9338, 40.81847], [-73.93444, 40.82705], [-73.93517, 40.83288], [-73.93492, 40.83511], [-73.93091, 40.84251], [-73.92976, 40.84518], [-73.9247, 40.8525], [-73.92228, 40.85566], [-73.92238, 40.85657], [-73.92197, 40.85699], [-73.92159, 40.85709], [-73.92165, 40.85734], [-73.92106, 40.85776], [-73.92114, 40.85793], [-73.92085, 40.85794], [-73.92134, 40.85828], [-73.92138, 40.85877], [-73.9221, 40.85936], [-73.9214, 40.8605], [-73.92059, 40.85926], [-73.91951, 40.85878], [-73.91726, 40.86171], [-73.91536, 40.86317], [-73.91551, 40.86333], [-73.91518, 40.86367], [-73.9152, 40.86393], [-73.91583, 40.8641], [-73.91592, 40.86434], [-73.91392, 40.86475], [-73.91255, 40.86653], [-73.91274, 40.86661], [-73.91109, 40.869], [-73.91104, 40.86916], [-73.91148, 40.86947], [-73.91095, 40.86939], [-73.91073, 40.87096], [-73.91044, 40.87138], [-73.91054, 40.87216], [-73.91108, 40.87291], [-73.91183, 40.87353], [-73.91381, 40.87419], [-73.91545, 40.87456], [-73.91634, 40.87456], [-73.91812, 40.87384], [-73.91876, 40.87323], [-73.91928, 40.87367], [-73.91921, 40.87416], [-73.91888, 40.87466], [-73.92089, 40.87548], [-73.92119, 40.87511], [-73.92059, 40.8742], [-73.91998, 40.87385], [-73.91992, 40.87361], [-73.92006, 40.87326], [-73.92045, 40.87301], [-73.92126, 40.87308], [-73.92213, 40.87365], [-73.92259, 40.87435], [-73.92268, 40.87516], [-73.92237, 40.87645], [-73.9225, 40.87686], [-73.92325, 40.87726], [-73.92472, 40.87745], [-73.92604, 40.87705], [-73.92642, 40.87718], [-73.92628, 40.87751], [-73.92655, 40.8776], [-73.92739, 40.8768], [-73.92806, 40.87659], [-73.92899, 40.87579], [-73.93016, 40.87409], [-73.93196, 40.87105], [-73.93222, 40.87001], [-73.93203, 40.86956], [-73.9326, 40.86898], [-73.93234, 40.86893], [-73.93226, 40.86868], [-73.93245, 40.86753], [-73.93748, 40.86013], [-73.93825, 40.8594], [-73.93914, 40.858], [-73.94022, 40.85678], [-73.94209, 40.85361], [-73.94344, 40.85231], [-73.94434, 40.85186], [-73.94468, 40.85193], [-73.9457, 40.85116], [-73.94612, 40.85119], [-73.94629, 40.85085], [-73.94649, 40.85099], [-73.94681, 40.85068], [-73.94706, 40.85023], [-73.94668, 40.84894], [-73.94684, 40.84702], [-73.94634, 40.84625], [-73.94655, 40.84601], [-73.94631, 40.84569], [-73.9461, 40.84387], [-73.94853, 40.83962], [-73.9495, 40.83703], [-73.94954, 40.83684], [-73.94932, 40.83671], [-73.94958, 40.83657], [-73.95013, 40.83447], [-73.95106, 40.83295], [-73.95456, 40.82787], [-73.95469, 40.82793], [-73.95501, 40.82746], [-73.95632, 40.82796], [-73.95697, 40.82702], [-73.95728, 40.82714], [-73.95959, 40.82364], [-73.95815, 40.82302], [-73.95823, 40.8229], [-73.95795, 40.82278], [-73.95818, 40.82237], [-73.95968, 40.82046], [-73.96043, 40.81995], [-73.9644, 40.81541], [-73.96889, 40.80871], [-73.97222, 40.80429], [-73.98794, 40.78183], [-73.98892, 40.78023], [-73.98887, 40.7797], [-73.99039, 40.77758], [-73.99093, 40.77756], [-73.99241, 40.77553], [-73.99251, 40.77498], [-73.99369, 40.77356], [-73.99389, 40.77296], [-73.99708, 40.76874], [-73.99625, 40.76839], [-73.99839, 40.76524], [-73.99963, 40.76357], [-73.99992, 40.7634], [-74.00073, 40.76375], [-74.00368, 40.75971], [-74.00523, 40.75724], [-74.00543, 40.75732], [-74.00762, 40.75429], [-74.00961, 40.74905], [-74.00808, 40.7484], [-74.00927, 40.74231], [-74.00967, 40.74131], [-74.00954, 40.74126], [-74.00969, 40.7406], [-74.01147, 40.74069], [-74.01161, 40.73928], [-74.01037, 40.73921], [-74.01087, 40.7336], [-74.01072, 40.73347], [-74.0109, 40.73335], [-74.01156, 40.7264], [-74.01322, 40.71832], [-74.01671, 40.71863], [-74.01773, 40.71309], [-74.01758, 40.71361], [-74.01633, 40.71341], [-74.01662, 40.7128], [-74.01663, 40.71217], [-74.01781, 40.71235], [-74.01778, 40.71284], [-74.01886, 40.70803], [-74.01818, 40.70783], [-74.01854, 40.70691], [-74.01885, 40.70698], [-74.01864, 40.70714], [-74.01912, 40.70698], [-74.01934, 40.70608]];
 
   // Street curvature correction (removes a ~0.25-block sag in the 50s-70s), clamped so it
@@ -299,18 +159,13 @@
     var stLin = ST.c0 + ST.cLon * dlon + ST.cLat * dlat;
     var stQ = STQ[0] + STQ[1] * dlon + STQ[2] * dlat + STQ[3] * dlat * dlat + STQ[4] * dlon * dlat;
     var corr = Math.max(-0.8, Math.min(0.8, stQ - stLin));
-    return {
-      ave: AVE.c0 + AVE.cLon * dlon + AVE.cLat * dlat,
-      st: stLin + corr
-    };
+    return { ave: AVE.c0 + AVE.cLon * dlon + AVE.cLat * dlat, st: stLin + corr };
   }
-  // inverse: (ave,st) -> (lat,lon), used to draw the grid.
   function toLatLon(ave, st) {
     var det = AVE.cLon * ST.cLat - AVE.cLat * ST.cLon;
     var a = ave - AVE.c0, s = st - ST.c0;
-    var dlon = (a * ST.cLat - s * AVE.cLat) / det;
-    var dlat = (AVE.cLon * s - ST.cLon * a) / det;
-    return { lat: LAT0 + dlat, lon: LON0 + dlon };
+    return { lat: LAT0 + (AVE.cLon * s - ST.cLon * a) / det,
+             lon: LON0 + (a * ST.cLat - s * AVE.cLat) / det };
   }
   function labelStreet(st) { return st < HOUSTON + 0.5 ? st + 1 : st; }
   function d1(x) { x = Math.round(x * 2) / 2; if (x === 0) x = 0; return (x % 1 === 0) ? String(x) : x.toFixed(1); }
@@ -376,198 +231,124 @@
     return "";
   }
 
-  // ---- PROJECTION (equirectangular, aspect-preserving) ----
-  var latMax = 40.885, latMin = 40.695, lonMin = -74.030, lonMax = -73.900;
-  var COS = Math.cos(40.78 * Math.PI / 180);
-  var mxRange = (lonMax - lonMin) * COS, myRange = (latMax - latMin);
-  var scale = 1, offX = 0, offY = 0;
+  // ---- MAP ----
+  var map = L.map("map", { zoomControl: true }).setView([40.7580, -73.9855], 13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
 
-  var canvas = document.getElementById("map");
-  var ctx = canvas.getContext("2d");
-  var cssW = 0, cssH = 0;
+  var marker = L.marker([40.7580, -73.9855], { draggable: true }).addTo(map);
 
-  function sizeCanvas() {
-    var rect = canvas.getBoundingClientRect();
-    cssW = rect.width;
-    cssH = Math.max(320, Math.round(cssW / 0.62)); // Manhattan is tall & narrow
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.style.height = cssH + "px";
-    canvas.width = Math.round(cssW * dpr);
-    canvas.height = Math.round(cssH * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    scale = Math.min(cssW / mxRange, cssH / myRange) * 0.94;
-    offX = (cssW - mxRange * scale) / 2;
-    offY = (cssH - myRange * scale) / 2;
-  }
-  function proj(lat, lon) {
-    return { x: offX + (lon - lonMin) * COS * scale, y: offY + (latMax - lat) * scale };
-  }
-  function unproj(x, y) {
-    return { lon: lonMin + (x - offX) / scale / COS, lat: latMax - (y - offY) / scale };
-  }
-
-  function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
-
-  function draw() {
-    ctx.clearRect(0, 0, cssW, cssH);
-    ctx.fillStyle = css("--water"); ctx.fillRect(0, 0, cssW, cssH);
-
-    // land = the real Manhattan coastline (embedded from OpenStreetMap)
-    ctx.beginPath();
-    LAND_OUTLINE.forEach(function (c, i) {
-      var p = proj(c[1], c[0]);   // c = [lon, lat]
-      i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y);
-    });
-    ctx.closePath();
-    ctx.fillStyle = css("--land"); ctx.fill();
-    ctx.lineWidth = 1.5; ctx.strokeStyle = css("--coast"); ctx.stroke();
-
-    ctx.save();
-    ctx.clip(); // keep grid inside the island
-    ctx.lineWidth = 1; ctx.strokeStyle = css("--grid");
-    var a, s;
-    for (s = 0; s <= 220; s += 10) {              // streets
-      var p1 = ll2p(AVE_MIN, s), p2 = ll2p(AVE_MAX, s);
-      ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
-    }
-    for (a = 1; a <= 12; a += 1) {                // avenues
-      var q1 = ll2p(a, ST_MIN), q2 = ll2p(a, ST_MAX);
-      ctx.beginPath(); ctx.moveTo(q1.x, q1.y); ctx.lineTo(q2.x, q2.y); ctx.stroke();
-    }
-    // Central Park (streets 59-110, avenues 5-8) drawn from the grid model
-    var park = [[5, 59], [8, 59], [8, 110], [5, 110]].map(function (c) { return ll2p(c[0], c[1]); });
-    ctx.beginPath();
-    park.forEach(function (p, i) { i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y); });
-    ctx.closePath();
-    ctx.fillStyle = "rgba(120,158,74,0.34)"; ctx.fill();
-    ctx.strokeStyle = "rgba(96,124,52,0.55)"; ctx.lineWidth = 1; ctx.stroke();
-    ctx.restore();
-
-    // Central Park label
-    var pcx = ll2p(6.5, 84.5);
-    ctx.fillStyle = "rgba(48,74,32,0.9)";
-    ctx.font = "700 9px system-ui, sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("CENTRAL", pcx.x, pcx.y - 2);
-    ctx.fillText("PARK", pcx.x, pcx.y + 8);
-    ctx.textAlign = "left";
-
-    // river labels
-    ctx.fillStyle = css("--coast");
-    ctx.font = "600 11px system-ui, sans-serif";
-    ctx.save(); ctx.translate(14, cssH * 0.42); ctx.rotate(-Math.PI / 2);
-    ctx.fillText("HUDSON RIVER", 0, 0); ctx.restore();
-    ctx.save(); ctx.translate(cssW - 14, cssH * 0.58); ctx.rotate(Math.PI / 2);
-    ctx.fillText("EAST RIVER", 0, 0); ctx.restore();
-
-    // compass rose (true north is up)
-    var cx = cssW - 34, cy = 30;
-    ctx.strokeStyle = css("--coast"); ctx.fillStyle = css("--coast"); ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(cx, cy + 12); ctx.lineTo(cx, cy - 12); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx, cy - 14); ctx.lineTo(cx - 4, cy - 8); ctx.lineTo(cx + 4, cy - 8); ctx.closePath(); ctx.fill();
-    ctx.font = "700 10px system-ui, sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("N", cx, cy - 17); ctx.textAlign = "left";
-
-    // pin
-    var p = proj(pin.lat, pin.lon);
-    ctx.beginPath(); ctx.arc(p.x, p.y, 13, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(0,0,0,.12)"; ctx.fill();
-    ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
-    ctx.fillStyle = css("--accent"); ctx.fill();
-    ctx.lineWidth = 2.5; ctx.strokeStyle = "#fff"; ctx.stroke();
-  }
-  function ll2p(ave, st) { var ll = toLatLon(ave, st); return proj(ll.lat, ll.lon); }
-
-  // ---- STATE ----
-  var pin = { lat: 40.7580, lon: -73.9855 };   // Times Square-ish
-  var shown = { lat: pin.lat, lon: pin.lon };   // what the watch currently displays
+  var shown = { lat: 40.7580, lon: -73.9855 };
   var batterySaver = false, compassOn = true;
+
+  function fmtGrid(v) { return (Math.round(v * 100) / 100).toFixed(2); }
 
   function updateWatch(fixLabel) {
     var r = reading(shown.lat, shown.lon);
-    var readingEl = document.getElementById("reading");
+    var el = document.getElementById("reading");
     if (r.far) {
-      readingEl.className = "reading toofar";
-      readingEl.innerHTML = "THE SUBURBS";
+      el.className = "reading toofar"; el.textContent = "THE SUBURBS";
       document.getElementById("caption").textContent = "not manhattan";
       document.getElementById("hood").textContent = "—";
     } else {
-      readingEl.className = "reading";
-      readingEl.innerHTML = '<span>' + r.stTxt + '</span><span class="x">×</span><span>' + r.aveTxt + '</span>';
+      el.className = "reading";
+      el.innerHTML = r.stTxt + '<span class="x">×</span>' + r.aveTxt;
       document.getElementById("caption").textContent = "street × avenue";
       document.getElementById("hood").textContent = r.hood || "—";
     }
-    document.getElementById("oLat").textContent = shown.lat.toFixed(5);
-    document.getElementById("oLon").textContent = shown.lon.toFixed(5);
-    document.getElementById("oSt").textContent = r.st.toFixed(2);
-    document.getElementById("oAve").textContent = r.ave.toFixed(2);
+    document.getElementById("coords").innerHTML =
+      "<b>lat</b> " + shown.lat.toFixed(5) + "  <b>lon</b> " + shown.lon.toFixed(5) +
+      "<br><b>model</b> street " + fmtGrid(r.st) + " · avenue " + fmtGrid(r.ave) +
+      (r.hood ? "<br><b>area</b> " + r.hood : "");
     if (fixLabel) document.getElementById("fix").textContent = fixLabel;
   }
 
-  function onMove(lat, lon) {
-    pin.lat = lat; pin.lon = lon;
-    draw();
+  function moved(lat, lon) {
     if (!batterySaver) { shown.lat = lat; shown.lon = lon; updateWatch("FIX live"); }
-    else { document.getElementById("fix").textContent = "moved — press ⟳"; }
+    else { document.getElementById("fix").textContent = "moved — ⟳"; }
   }
 
-  // ---- INTERACTION ----
-  var dragging = false;
-  function pointToLL(ev) {
-    var rect = canvas.getBoundingClientRect();
-    var x = ev.clientX - rect.left, y = ev.clientY - rect.top;
-    x = Math.max(0, Math.min(cssW, x)); y = Math.max(0, Math.min(cssH, y));
-    return unproj(x, y);
-  }
-  canvas.addEventListener("pointerdown", function (ev) {
-    dragging = true; canvas.setPointerCapture(ev.pointerId);
-    var ll = pointToLL(ev); onMove(ll.lat, ll.lon);
-  });
-  canvas.addEventListener("pointermove", function (ev) {
-    if (!dragging) return; var ll = pointToLL(ev); onMove(ll.lat, ll.lon);
-  });
-  canvas.addEventListener("pointerup", function () { dragging = false; });
+  marker.on("drag", function (e) { var p = e.target.getLatLng(); moved(p.lat, p.lng); });
+  map.on("click", function (e) { marker.setLatLng(e.latlng); moved(e.latlng.lat, e.latlng.lng); });
 
-  document.getElementById("refreshBtn").addEventListener("click", function () {
-    shown.lat = pin.lat; shown.lon = pin.lon;
+  function setPin(lat, lon, fly) {
+    marker.setLatLng([lat, lon]);
+    shown.lat = lat; shown.lon = lon;
+    if (fly) map.setView([lat, lon], Math.max(map.getZoom(), 14));
     updateWatch("FIX now");
+  }
+
+  // ---- Controls ----
+  document.getElementById("refreshBtn").addEventListener("click", function () {
+    var p = marker.getLatLng(); shown.lat = p.lat; shown.lon = p.lng; updateWatch("FIX now");
   });
   var compassBtn = document.getElementById("compassBtn");
   compassBtn.addEventListener("click", function () {
     compassOn = !compassOn;
-    compassBtn.textContent = "Compass: " + (compassOn ? "ON" : "OFF");
+    compassBtn.textContent = "Compass " + (compassOn ? "ON" : "OFF");
     compassBtn.classList.toggle("on", compassOn);
-    compassBtn.setAttribute("aria-pressed", String(compassOn));
     document.getElementById("compass").classList.toggle("off", !compassOn);
   });
-  document.getElementById("battery").addEventListener("change", function (e) {
-    batterySaver = e.target.checked;
+  var batteryBtn = document.getElementById("batteryBtn");
+  batteryBtn.addEventListener("click", function () {
+    batterySaver = !batterySaver;
+    batteryBtn.classList.toggle("on", batterySaver);
     document.getElementById("fix").textContent = batterySaver ? "press ⟳ to fix" : "FIX live";
   });
+  document.getElementById("locateBtn").addEventListener("click", function () {
+    if (!navigator.geolocation) { alert("Geolocation not available in this browser."); return; }
+    document.getElementById("fix").textContent = "locating…";
+    navigator.geolocation.getCurrentPosition(
+      function (pos) { setPin(pos.coords.latitude, pos.coords.longitude, true); },
+      function (err) {
+        document.getElementById("fix").textContent = "FIX now";
+        alert("Couldn't get your location: " + err.message +
+              "\n\n(Browsers often block GPS for files opened directly. It works when the page is served over http/https.)");
+      }, { enableHighAccuracy: true, timeout: 10000 });
+  });
 
-  // presets
+  // ---- Grid overlay (streets & avenues from the model) ----
+  var gridLayer = L.layerGroup();
+  var gridOn = false;
+  (function buildGrid() {
+    var s, a, e;
+    for (s = 0; s <= 135; s += 1) {
+      e = [[toLatLon(AVE_MIN, s).lat, toLatLon(AVE_MIN, s).lon],
+           [toLatLon(AVE_MAX, s).lat, toLatLon(AVE_MAX, s).lon]];
+      L.polyline(e, { color: "#c1432a", weight: (s % 10 === 0) ? 1.4 : 0.5,
+                      opacity: (s % 10 === 0) ? 0.7 : 0.4 }).addTo(gridLayer);
+    }
+    for (a = 1; a <= 12; a += 1) {
+      e = [[toLatLon(a, ST_MIN).lat, toLatLon(a, ST_MIN).lon],
+           [toLatLon(a, ST_MAX).lat, toLatLon(a, ST_MAX).lon]];
+      L.polyline(e, { color: "#1f6f8b", weight: 0.9, opacity: 0.5 }).addTo(gridLayer);
+    }
+  })();
+  var gridBtn = document.getElementById("gridBtn");
+  gridBtn.addEventListener("click", function () {
+    gridOn = !gridOn;
+    if (gridOn) gridLayer.addTo(map); else map.removeLayer(gridLayer);
+    gridBtn.classList.toggle("on", gridOn);
+  });
+
+  // ---- Presets ----
   var PRESETS = [
-    ["Times Square", 40.7580, -73.9855],
-    ["Flatiron", 40.7411, -73.9896],
-    ["Empire State", 40.7484, -73.9857],
-    ["Central Park W · 72", 40.7760, -73.9760],
-    ["Harlem · 125th", 40.8090, -73.9490],
-    ["Alphabet City (Ave C)", 40.7241, -73.9789],
-    ["1st block below Houston", 40.7270, -74.0012],
-    ["Deep SoHo (negative)", 40.7228, -74.0015],
-    ["Brooklyn (off-island)", 40.6782, -73.9442]
+    ["Times Sq", 40.7580, -73.9855], ["Flatiron", 40.7411, -73.9896],
+    ["Harlem 125th", 40.8090, -73.9490], ["Below Houston", 40.7270, -74.0012],
+    ["Alphabet City", 40.7241, -73.9789], ["Financial Dist", 40.7075, -74.0100],
+    ["Brooklyn", 40.6782, -73.9442]
   ];
   var pc = document.getElementById("presets");
   PRESETS.forEach(function (p) {
     var b = document.createElement("button");
-    b.className = "chip"; b.type = "button"; b.textContent = p[0];
-    b.addEventListener("click", function () {
-      shown.lat = pin.lat = p[1]; shown.lon = pin.lon = p[2];
-      draw(); updateWatch("FIX now");
-    });
+    b.type = "button"; b.textContent = p[0];
+    b.addEventListener("click", function () { setPin(p[1], p[2], true); });
     pc.appendChild(b);
   });
 
-  // ---- CLOCK ----
+  // ---- Clock ----
   var DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   function tick() {
     var d = new Date();
@@ -576,17 +357,11 @@
     var ss = String(d.getSeconds()).padStart(2, "0");
     document.getElementById("clock").innerHTML =
       hh + '<span class="colon blink">:</span>' + mm + '<span class="sec">·' + ss + '</span>';
-    document.getElementById("dateStr").textContent =
-      DAYS[d.getDay()] + " " + (d.getMonth() + 1) + "-" + d.getDate();
+    document.getElementById("dateStr").textContent = DAYS[d.getDay()] + " " + (d.getMonth() + 1) + "-" + d.getDate();
   }
 
-  // ---- BOOT ----
-  function boot() { sizeCanvas(); draw(); updateWatch("FIX now"); tick(); }
-  window.addEventListener("resize", function () { sizeCanvas(); draw(); });
-  boot();
-  setInterval(tick, 1000);
+  updateWatch("FIX now"); tick(); setInterval(tick, 1000);
 })();
 </script>
-
 </body>
 </html>

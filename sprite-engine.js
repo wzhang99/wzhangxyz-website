@@ -20,17 +20,17 @@ const cursorHand = document.getElementById('cursor-hand');
 const clearAnteaterBtn = document.createElement('button');
 clearAnteaterBtn.id = 'clear-anteater-btn';
 clearAnteaterBtn.className = 'retro-btn';
-clearAnteaterBtn.textContent = 'kill anteater';
+clearAnteaterBtn.textContent = 'clear anteater';
 document.body.appendChild(clearAnteaterBtn);
 
 const popupBackdrop = document.createElement('div');
 popupBackdrop.id = 'anteater-popup-backdrop';
 popupBackdrop.innerHTML =
     '<div id="anteater-popup">' +
-    '<p>Anteaters such as the giant anteater are protected in their native ' +
+    '<p>Anteaters, like this giant anteater, are protected in their native ' +
     'habitats (Central and South America) under the Convention on International ' +
     'Trade in Endangered Species and by local wildlife conservation laws. ' +
-    'Harming them without federal permits is illegal.</p>' +
+    'Harming or capturing an anteater without the proper federal permits is illegal.</p>' +
     '<button class="ok" type="button">ok</button>' +
     '</div>';
 document.body.appendChild(popupBackdrop);

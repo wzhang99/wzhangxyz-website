@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>readout lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Big+Shoulders+Display:wght@300;600&family=Chakra+Petch:wght@300;500;700&family=Fraunces:ital,wght@0,400;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;600&family=JetBrains+Mono:wght@300;500;700&family=Orbitron:wght@400;600;800&family=Silkscreen&family=Space+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: "DSEG7";
+    src: url("https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Light.woff2") format("woff2");
+    font-display: swap;
+  }
+
+  :root {
+    --bg: #08090b;
+    --ink: #e7e9e4;
+    --dim: #6b7079;
+    --line: #1c1f24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background:
+      radial-gradient(120% 80% at 50% -10%, #12151a 0%, #08090b 55%) fixed,
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    padding: 40px 28px 80px;
+  }
+
+  /* ---- header ---- */
+  header { max-width: 1180px; margin: 0 auto 34px; }
+  h1 { font-size: 15px; font-weight: 600; letter-spacing: 0.36em; text-transform: uppercase; }
+  .sub { margin-top: 10px; color: var(--dim); font-size: 12.5px; line-height: 1.7; max-width: 66ch; }
+  .sub b { color: #9aa0a8; font-weight: 400; }
+  .controls { margin-top: 18px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .controls span { color: var(--dim); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; margin-right: 4px; }
+  .controls button {
+    font: inherit; font-size: 11.5px; letter-spacing: 0.06em; cursor: pointer;
+    color: #cbd0d6; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px;
+    transition: border-color .18s, color .18s, background .18s;
+  }
+  .controls button:hover { border-color: #3a4049; color: #fff; }
+  .controls button.active { border-color: #6ec6bd; color: #b9ede7; background: rgba(94,207,202,0.08); }
+
+  /* ---- grid ---- */
+  .grid {
+    max-width: 1180px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(316px, 1fr)); gap: 18px;
+  }
+
+  .card {
+    position: relative; overflow: hidden;
+    border: 1px solid var(--line); border-radius: 16px;
+    min-height: 210px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    padding: 44px 20px 40px;
+    background: #0c0e11;
+    opacity: 0; transform: translateY(10px);
+    animation: rise .55s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  .card:nth-child(1){animation-delay:.02s}.card:nth-child(2){animation-delay:.06s}
+  .card:nth-child(3){animation-delay:.10s}.card:nth-child(4){animation-delay:.14s}
+  .card:nth-child(5){animation-delay:.18s}.card:nth-child(6){animation-delay:.22s}
+  .card:nth-child(7){animation-delay:.26s}.card:nth-child(8){animation-delay:.30s}
+  .card:nth-child(9){animation-delay:.34s}.card:nth-child(10){animation-delay:.38s}
+  .card:nth-child(11){animation-delay:.42s}.card:nth-child(12){animation-delay:.46s}
+
+  .card .label {
+    position: absolute; top: 13px; left: 15px; z-index: 3;
+    font: 10.5px/1 "IBM Plex Mono", monospace; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #565c65;
+  }
+  .card .note {
+    position: absolute; bottom: 12px; left: 15px; right: 15px; z-index: 3;
+    font: 10.5px/1.45 "IBM Plex Mono", monospace; color: #474d55;
+  }
+
+  /* reading skeleton (shared) */
+  .reading { text-align: center; z-index: 2; }
+  .cross { display: inline-flex; align-items: baseline; justify-content: center; white-space: nowrap; line-height: 1; }
+  .sub-read { display: none; line-height: 1; }
+  .hood { margin-top: 12px; }
+  body.suburbs .cross { display: none; }
+  body.suburbs .sub-read { display: inline-flex; }
+  body.suburbs .hood { visibility: hidden; }
+
+  /* ============ 01 · instrument mono (refined current + glow) ============ */
+  .v-instrument { background: radial-gradient(120% 120% at 50% 0%, #14181c, #0a0c0f); }
+  .v-instrument .cross { font-family: "IBM Plex Mono"; font-weight: 300; font-size: 62px; color: #e9ebe5;
+    letter-spacing: .01em; text-shadow: 0 0 26px rgba(150,175,150,.18); }
+  .v-instrument .x { color: #6f7a70; opacity: .6; margin: 0 .2em; font-weight: 300; }
+  .v-instrument .sub-read { font-family: "IBM Plex Mono"; font-weight: 300; font-size: 40px; color: #e9ebe5; }
+  .v-instrument .hood { font-family: "IBM Plex Mono"; font-weight: 400; font-size: 12px; letter-spacing: .22em;
+    text-transform: lowercase; color: #93a08c; opacity: .8; }
+
+  /* ============ 02 · amber CRT ============ */
+  .v-amber { background: #0a0806; }
+  .v-amber::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: repeating-linear-gradient(rgba(255,255,255,.045) 0 1px, transparent 1px 3px); }
+  .v-amber .cross { font-family: "VT323", monospace; font-size: 84px; color: #ffb454; letter-spacing: .01em;
+    text-shadow: 0 0 8px rgba(255,150,40,.6), 0 0 24px rgba(255,120,20,.35); animation: crt 4.5s ease-in-out infinite; }
+  .v-amber .x { opacity: .7; margin: 0 .06em; }
+  .v-amber .sub-read { font-family: "VT323", monospace; font-size: 66px; color: #ffb454;
+    text-shadow: 0 0 8px rgba(255,150,40,.6); }
+  .v-amber .hood { font-family: "VT323", monospace; font-size: 22px; letter-spacing: .12em; text-transform: lowercase;
+    color: #d98a2e; }
+  @keyframes crt { 0%,100%{opacity:1} 47%{opacity:.97} 50%{opacity:.9} 53%{opacity:.99} }
+
+  /* ============ 03 · digital / techno ============ */
+  .v-digital { background: radial-gradient(130% 120% at 50% 15%, #0c1719, #070a0c); }
+  .v-digital .cross { font-family: "Orbitron", sans-serif; font-weight: 600; font-size: 46px; color: #7ff0e0;
+    letter-spacing: .03em; text-shadow: 0 0 16px rgba(90,235,215,.45); }
+  .v-digital .x { font-weight: 400; opacity: .55; margin: 0 .14em; }
+  .v-digital .sub-read { font-family: "Orbitron", sans-serif; font-weight: 600; font-size: 30px; color: #7ff0e0;
+    letter-spacing: .02em; text-shadow: 0 0 16px rgba(90,235,215,.45); }
+  .v-digital .hood { font-family: "Orbitron", sans-serif; font-weight: 400; font-size: 11px; letter-spacing: .28em;
+    text-transform: uppercase; color: #4f9d92; }
+
+  /* ============ 04 · HUD tactical ============ */
+  .v-hud {
+    background:
+      linear-gradient(rgba(150,190,110,.05) 1px, transparent 1px) 0 0/22px 22px,
+      linear-gradient(90deg, rgba(150,190,110,.05) 1px, transparent 1px) 0 0/22px 22px,
+      #0a0d09;
+  }
+  .v-hud .cross { font-family: "Chakra Petch", sans-serif; font-weight: 500; font-size: 58px; color: #bcd583;
+    letter-spacing: .01em; text-shadow: 0 0 18px rgba(160,200,90,.25); }
+  .v-hud .x { color: #d98a3e; font-weight: 300; margin: 0 .1em; }
+  .v-hud .sub-read { font-family: "Chakra Petch", sans-serif; font-weight: 500; font-size: 38px; color: #bcd583; }
+  .v-hud .hood { font-family: "Chakra Petch", sans-serif; font-weight: 300; font-size: 12px; letter-spacing: .24em;
+    text-transform: uppercase; color: #7e9256; }
+
+  /* ============ 05 · split-flap board ============ */
+  .v-flap { background: #0a0b0d; }
+  .v-flap .cross { font-family: "Space Mono", monospace; font-weight: 700; font-size: 46px; color: #f2ede0; }
+  .v-flap .cross span, .v-flap .sub-read span {
+    display: inline-block; background: linear-gradient(#232629 0 49.5%, #15171a 49.5% 100%);
+    border-radius: 4px; padding: .06em .12em; margin: 0 2px;
+    box-shadow: inset 0 1px 0 #33373c, inset 0 -1px 0 #000; }
+  .v-flap .x { background: none !important; box-shadow: none !important; color: #d98a3e; padding: 0 .04em; }
+  .v-flap .sub-read { font-family: "Space Mono", monospace; font-weight: 700; font-size: 24px; color: #f2ede0; }
+  .v-flap .hood { font-family: "Space Mono", monospace; font-weight: 400; font-size: 11px; letter-spacing: .2em;
+    text-transform: uppercase; color: #8a8f97; }
+
+  /* ============ 06 · pixel (site sprite nod) ============ */
+  .v-pixel { background: #050505; }
+  .v-pixel .cross { font-family: "Silkscreen", monospace; font-weight: 400; font-size: 34px; color: #5ecfca;
+    letter-spacing: .02em; }
+  .v-pixel .x { color: #8ddeda; margin: 0 .12em; }
+  .v-pixel .sub-read { font-family: "Silkscreen", monospace; font-size: 22px; color: #5ecfca; }
+  .v-pixel .hood { font-family: "Silkscreen", monospace; font-size: 10px; letter-spacing: .1em; color: #777; }
+
+  /* ============ 07 · contrast serif ============ */
+  .v-serif { background: radial-gradient(120% 120% at 50% 0%, #16130f, #0b0a08); }
+  .v-serif .cross { font-family: "Fraunces", serif; font-style: italic; font-weight: 300; font-size: 66px;
+    color: #ece7df; }
+  .v-serif .x { font-weight: 300; opacity: .4; margin: 0 .12em; font-size: .7em; }
+  .v-serif .sub-read { font-family: "Fraunces", serif; font-style: italic; font-weight: 300; font-size: 46px; color: #ece7df; }
+  .v-serif .hood { font-family: "Fraunces", serif; font-style: italic; font-weight: 400; font-size: 15px;
+    letter-spacing: .04em; color: #9c948a; }
+
+  /* ============ 08 · neon ============ */
+  .v-neon { background: radial-gradient(130% 120% at 50% 120%, #1a0b16, #070509); }
+  .v-neon .cross { font-family: "Chakra Petch", sans-serif; font-weight: 500; font-size: 56px; color: #fff;
+    text-shadow: 0 0 5px #ff2d9b, 0 0 16px #ff2d9b, 0 0 34px rgba(255,45,155,.55); animation: pulse 3.2s ease-in-out infinite; }
+  .v-neon .x { color: #5ef0e0; text-shadow: 0 0 6px #5ef0e0, 0 0 16px rgba(94,240,224,.6); margin: 0 .1em; }
+  .v-neon .sub-read { font-family: "Chakra Petch", sans-serif; font-weight: 500; font-size: 36px; color: #fff;
+    text-shadow: 0 0 5px #ff2d9b, 0 0 16px #ff2d9b; }
+  .v-neon .hood { font-family: "Chakra Petch", sans-serif; font-weight: 300; font-size: 12px; letter-spacing: .26em;
+    text-transform: uppercase; color: #b8618f; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.86} }
+
+  /* ============ 09 · 7-segment LCD panel ============ */
+  .v-lcd { background: linear-gradient(165deg, #9fae8b, #8b9b78); }
+  .v-lcd .reading { position: relative; }
+  .v-lcd .ghost {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: "DSEG7", monospace; font-size: 50px; color: #20261a; opacity: .1; pointer-events: none;
+    letter-spacing: .04em; }
+  .v-lcd .cross { font-family: "DSEG7", "IBM Plex Mono", monospace; font-size: 50px; color: #20261a;
+    letter-spacing: .04em; }
+  .v-lcd .x { font-family: "IBM Plex Mono", monospace; font-size: .7em; opacity: .55; margin: 0 .16em; }
+  .v-lcd .sub-read { font-family: "IBM Plex Mono", monospace; font-weight: 400; font-size: 30px; color: #20261a;
+    text-transform: lowercase; }
+  .v-lcd .hood { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 11px; letter-spacing: .2em;
+    text-transform: uppercase; color: #33402a; }
+  .v-lcd .label, .v-lcd .note { color: #55603f; }
+
+  /* ============ 10 · industrial condensed ============ */
+  .v-industrial { background: #0b0c0d; }
+  .v-industrial::before { content: ""; position: absolute; inset: 0; z-index: 0;
+    background: repeating-linear-gradient(115deg, transparent 0 16px, rgba(255,255,255,.014) 16px 17px); }
+  .v-industrial .cross { font-family: "Big Shoulders Display", sans-serif; font-weight: 600; font-size: 82px;
+    color: #f0f0ec; letter-spacing: .005em; }
+  .v-industrial .x { color: #e0532f; font-weight: 300; margin: 0 .05em; font-size: .8em; }
+  .v-industrial .sub-read { font-family: "Big Shoulders Display", sans-serif; font-weight: 600; font-size: 52px; color: #f0f0ec;
+    text-transform: uppercase; }
+  .v-industrial .hood { font-family: "Big Shoulders Display", sans-serif; font-weight: 300; font-size: 15px;
+    letter-spacing: .2em; text-transform: uppercase; color: #7d8188; }
+
+  /* ============ 11 · gradient mono ============ */
+  .v-gradient { background: radial-gradient(120% 120% at 50% 0%, #0e1418, #07090b); }
+  .v-gradient .cross { font-family: "JetBrains Mono", monospace; font-weight: 500; font-size: 56px;
+    background: linear-gradient(100deg, #9be7ff, #7ee0c0 55%, #b7f0d2);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+  .v-gradient .x { -webkit-text-fill-color: #5b6b6a; margin: 0 .12em; font-weight: 300; }
+  .v-gradient .sub-read { font-family: "JetBrains Mono", monospace; font-weight: 500; font-size: 36px;
+    background: linear-gradient(100deg, #9be7ff, #7ee0c0); -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; }
+  .v-gradient .hood { font-family: "JetBrains Mono", monospace; font-weight: 300; font-size: 11.5px; letter-spacing: .22em;
+    text-transform: lowercase; color: #5e8a83; }
+
+  /* ============ 12 · hollow outline ============ */
+  .v-outline { background: #0a0a0c; }
+  .v-outline .cross { font-family: "Anton", sans-serif; font-size: 78px; color: transparent;
+    -webkit-text-stroke: 1.2px #d3d7cf; letter-spacing: .02em; }
+  .v-outline .x { -webkit-text-stroke: 0; color: #5ecfca; font-size: .6em; margin: 0 .12em; }
+  .v-outline .sub-read { font-family: "Anton", sans-serif; font-size: 52px; color: transparent;
+    -webkit-text-stroke: 1.2px #d3d7cf; text-transform: uppercase; }
+  .v-outline .hood { font-family: "Anton", sans-serif; font-size: 14px; letter-spacing: .24em; text-transform: uppercase;
+    color: #6b7079; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card { animation: none; opacity: 1; transform: none; }
+    .v-amber .cross, .v-neon .cross { animation: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>readout lab</h1>
+  <p class="sub">Aesthetic tests for the Manhattan GPS Watch <b>/live</b> cross-street readout. Same content
+    in every card — the street × avenue number and the neighborhood — so you can compare the type, color, and
+    treatment head-to-head. Card 01 is a refined take on the current direction (with a bit more highlight);
+    the rest range from understated to loud. Pick one (or mix) by its number/name.</p>
+  <div class="controls">
+    <span>reading</span>
+    <button id="btn-man" class="active" type="button">manhattan</button>
+    <button id="btn-sub" type="button">the suburbs</button>
+  </div>
+</header>
+
+<main class="grid" id="grid">
+  <!-- 01 -->
+  <div class="card v-instrument">
+    <span class="label">01 · instrument</span>
+    <div class="reading">
+      <div class="cross"><span>54</span><span class="x">×</span><span>7.5</span></div>
+      <div class="sub-read">the suburbs</div>
+      <div class="hood">east village</div>
+    </div>
+    <span class="note">IBM Plex Mono 300 · faint glow · the tuned "current" look</span>
+  </div>
+  <!-- 02 -->
+  <div class="card v-amber">
+    <span class="label">02 · amber crt</span>
+    <div class="reading">
+      <div class="cross"><span>54</span><span class="x">×</span><span>7.5</span></div>
+      <div class="sub-read">the suburbs</div>
+      <div class="hood">east village</div>
+    </div>
+    <span class="note">VT323 · amber glow + scanlines</span>
+  </div>
+  <!-- 03 -->
+  <div class="card v-digital">
+    <span class="label">03 · digital</span>
+    <div class="reading">
+      <div class="cross"><span>54</span><span class="x">×</span><span>7.5</span></div>
+      <div class="sub-read">the suburbs</div>
+      <div class="hood">east village</div>
+    </div>
+    <span class="note">Orbitron · cyan techno glow</span>
+  </div>
+  <!-- 04 -->
+  <div class="card v-hud">
+    <span class="label">04 · hud tactical</span>
+    <div class="reading">
+      <div class="cross"><span>54</span><span class="x">×</span><span>7.5</span></div>
+      <div class="sub-read">the suburbs</div>
+      <div class="hood">east village</div>
+    </div>
+    <span class="note">Chakra Petch · grid field · olive-green</span>
+  </div>
+  <!-- 05 -->
+  <div class="card v-flap">
+    <span class="label">05 · split-flap</span>
+    <div class="reading">
+      <div class="cross"><span>5</span><span>4</span><span class="x">×</span><span>7</span><span>.</span><span>5</span></div>
+      <div class="sub-read"><span>S</span><span>U</span><span>B</span><span>S</span></div>
+      <div class="hood">east village</div>
+    </div>
+    <span class="note">Space Mono · departure-board tiles</span>
+  </div>
+  <!-- 06 -->
+  <div class="card v-pixel">
+    <span class="label">06 · pixel</span>
+    <div class="reading">
+      <div class="cross"><span>54</span><span class="x">×</span><span>7.5</span></div>
+      <div class="sub-read">the suburbs</div>
+      <div class="hood">east village</div>
+    </div>
+    <span class="note">Silkscreen · nods to the site's sprites</span>
+  </div>
+  <!-- 07 -->
+  <div class="card v-serif">
+    <span class="label">07 · contrast serif</span>
+    <div class="reading">
+      <div class="cross"><span>54</span><span class="x">×</span><span>7.5</span></div>
+      <div class="sub-read">the suburbs</div>
+      <div class="hood">east village</div>
+    </div>
+    <span class="note">Fraunces italic · editorial, unexpected</span>
+  </div>
+  <!-- 08 -->
+  <div class="card v-neon">
+    <span class="label">08 · neon</span>
+    <div class="reading">
+      <div class="cross"><span>54</span><span class="x">×</span><span>7.5</span></div>
+      <div class="sub-read">the suburbs</div>
+      <div class="hood">east village</div>
+    </div>
+    <span class="note">Chakra Petch · magenta/teal neon</span>
+  </div>
+  <!-- 09 -->
+  <div class="card v-lcd">
+    <span class="label">09 · 7-segment lcd</span>
+    <div class="reading">
+      <div class="ghost">88&nbsp;8.8</div>
+      <div class="cross"><span>54</span><span class="x">×</span><span>7.5</span></div>
+      <div class="sub-read">the suburbs</div>
+      <div class="hood">east village</div>
+    </div>
+    <span class="note">DSEG7 · real LCD panel + ghost segments</span>
+  </div>
+  <!-- 10 -->
+  <div class="card v-industrial">
+    <span class="label">10 · industrial</span>
+    <div class="reading">
+      <div class="cross"><span>54</span><span class="x">×</span><span>7.5</span></div>
+      <div class="sub-read">suburbs</div>
+      <div class="hood">east village</div>
+    </div>
+    <span class="note">Big Shoulders · condensed, red accent</span>
+  </div>
+  <!-- 11 -->
+  <div class="card v-gradient">
+    <span class="label">11 · gradient mono</span>
+    <div class="reading">
+      <div class="cross"><span>54</span><span class="x">×</span><span>7.5</span></div>
+      <div class="sub-read">the suburbs</div>
+      <div class="hood">east village</div>
+    </div>
+    <span class="note">JetBrains Mono · cool gradient fill</span>
+  </div>
+  <!-- 12 -->
+  <div class="card v-outline">
+    <span class="label">12 · hollow outline</span>
+    <div class="reading">
+      <div class="cross"><span>54</span><span class="x">×</span><span>7.5</span></div>
+      <div class="sub-read">suburbs</div>
+      <div class="hood">east village</div>
+    </div>
+    <span class="note">Anton · stroke-only numerals</span>
+  </div>
+</main>
+
+<script>
+  var man = document.getElementById("btn-man"), sub = document.getElementById("btn-sub");
+  man.addEventListener("click", function () {
+    document.body.classList.remove("suburbs");
+    man.classList.add("active"); sub.classList.remove("active");
+  });
+  sub.addEventListener("click", function () {
+    document.body.classList.add("suburbs");
+    sub.classList.add("active"); man.classList.remove("active");
+  });
+</script>
+</body>
+</html>

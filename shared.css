@@ -84,11 +84,14 @@ body.is-interior {
     line-height: 2;
 }
 .breadcrumb a {
-    color: #5ecfca;
+    color: #777;
+    text-decoration: none;
+}
+.breadcrumb a:hover {
+    color: #aaa;
     text-decoration: underline;
     text-underline-offset: 2px;
 }
-.breadcrumb a:hover { color: #8ddeda; }
 .breadcrumb .sep { color: #555; margin: 0 6px; }
 .breadcrumb .current { color: #777; }
 
@@ -143,6 +146,47 @@ body.is-interior {
 #bug-btn   { right: 28px; }
 #clear-btn { right: 68px; display: none; }
 #clear-btn.visible { display: block; }
+#clear-anteater-btn { right: 118px; display: none; }
+#clear-anteater-btn.visible { display: block; }
+
+/* ── Anteater conservation popup ────────── */
+#anteater-popup-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+}
+#anteater-popup-backdrop.visible { display: flex; }
+
+#anteater-popup {
+    max-width: 360px;
+    margin: 0 40px;
+    padding: 24px;
+    background: #000;
+    border: 1px solid #5ecfca;
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.8;
+    cursor: default;
+    user-select: text;
+}
+#anteater-popup .ok {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: #5ecfca;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+#anteater-popup .ok:hover { color: #8ddeda; }
 
 /* ── Custom cursor ──────────────────────── */
 body.placing, body.placing * { cursor: none; user-select: none; }

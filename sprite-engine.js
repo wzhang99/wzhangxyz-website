@@ -15,6 +15,43 @@ const cursorWrap = document.getElementById('cursor-wrap');
 const cursorItem = document.getElementById('cursor-item');
 const cursorHand = document.getElementById('cursor-hand');
 
+// "clear anteater" button + conservation popup — injected here so every
+// page gets them without editing per-page markup.
+const clearAnteaterBtn = document.createElement('button');
+clearAnteaterBtn.id = 'clear-anteater-btn';
+clearAnteaterBtn.className = 'retro-btn';
+clearAnteaterBtn.textContent = 'clear anteater';
+document.body.appendChild(clearAnteaterBtn);
+
+const popupBackdrop = document.createElement('div');
+popupBackdrop.id = 'anteater-popup-backdrop';
+popupBackdrop.innerHTML =
+    '<div id="anteater-popup">' +
+    '<p>Anteaters such as the giant anteater are protected in their native ' +
+    'habitats (Central and South America) under the Convention on International ' +
+    'Trade in Endangered Species and by local wildlife conservation laws. ' +
+    'Harming them without federal permits is illegal.</p>' +
+    '<button class="ok" type="button">ok</button>' +
+    '</div>';
+document.body.appendChild(popupBackdrop);
+const popupBox = popupBackdrop.querySelector('#anteater-popup');
+const popupOk  = popupBackdrop.querySelector('.ok');
+
+clearAnteaterBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    popupBackdrop.classList.add('visible');
+});
+// Click the backdrop or OK to dismiss; clicks inside the box do nothing.
+popupBackdrop.addEventListener('click', e => {
+    e.stopPropagation();
+    popupBackdrop.classList.remove('visible');
+});
+popupBox.addEventListener('click', e => e.stopPropagation());
+popupOk.addEventListener('click', e => {
+    e.stopPropagation();
+    popupBackdrop.classList.remove('visible');
+});
+
 document.addEventListener('contextmenu', e => e.preventDefault());
 
 document.addEventListener('mousemove', e => {
@@ -36,6 +73,7 @@ bugBtn.addEventListener('click', e => {
         bugBtn.classList.remove('active');
         clearBtn.classList.remove('visible');
         clearBtn.classList.remove('active');
+        clearAnteaterBtn.classList.remove('visible');
         document.body.classList.remove('placing');
     } else {
         mode = 'bugs';
@@ -52,6 +90,7 @@ clearBtn.addEventListener('click', e => {
     mode = anteater ? 'empty' : 'anteater';
     bugBtn.classList.remove('active');
     clearBtn.classList.add('active');
+    clearAnteaterBtn.classList.add('visible');
     document.body.classList.add('placing');
     syncCursorItem();
 });

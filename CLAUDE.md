@@ -29,6 +29,10 @@ Shared styles and JS live in two files that every page links:
 Every page has an interactive bug/anteater feature:
 - "bug" button (bottom right): click to enter placement mode, click screen to spawn animated bugs
 - "clear" button: places an anteater that hunts and eats bugs
+- "clear anteater" button (appears once "clear" is clicked): clicking it does NOT remove the
+  anteater — it pops up a mock conservation notice (giant anteaters are CITES-protected). A joke.
+- The "clear anteater" button and its popup are injected by `sprite-engine.js` (not in page markup),
+  so every page gets them; they are styled in `shared.css` (`#clear-anteater-btn`, `#anteater-popup`)
 - Sprites are SVG spritesheets in `sprites/`: `hand_spritesheet.svg`, `anteater_spritesheet_small.svg`, `bug_spritesheet_recolor.svg`
 - Keep this feature on all pages unless explicitly told otherwise
 
@@ -48,7 +52,7 @@ Every page has an interactive bug/anteater feature:
 - Primary text: `#fff`
 - Secondary/muted text: `#777`
 - Accent/links: `#5ecfca` (teal), hover `#8ddeda`
-- Breadcrumb: 12px; links teal `#5ecfca`, separator `>` in `#555`, current segment `#777`
+- Breadcrumb: 12px; all segments grey `#777` (links included, to match the current segment — no teal); links have no underline at rest, hover lightens to `#aaa` + underline; separator `>` in `#555`
 - Font: `'Courier New', Courier, monospace`, 12px
 - Nav underline offset: 2px
 - Interior page padding: `48px 60px 48px 200px` (leaves room for fixed left name)

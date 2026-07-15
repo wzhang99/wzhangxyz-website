@@ -42,8 +42,6 @@
   .lcd-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px;
              border-bottom: 1px solid var(--lcd-dim); padding-bottom: 5px; margin-bottom: 6px; }
   .mode { font-weight: 700; letter-spacing: .1em; }
-  .compass { font-weight: 700; }
-  .compass.off { opacity: .22; }
   .hero { text-align: center; margin: 1px 0 3px; }
   .reading { font-size: 29px; font-weight: 300; line-height: 1.05; white-space: nowrap; }
   .reading .x { opacity: .45; margin: 0 4px; font-weight: 300; }
@@ -105,7 +103,6 @@
   <div class="lcd">
     <div class="lcd-top">
       <span class="mode" id="dateStr">--</span>
-      <span class="compass" id="compass"><span>▲</span>N</span>
     </div>
     <div class="hero">
       <div class="reading" id="reading">—</div>
@@ -120,11 +117,7 @@
   <div class="ctrls">
     <div class="row">
       <button class="primary" id="refreshBtn" type="button">⟳ Refresh</button>
-      <button class="on" id="compassBtn" type="button">Compass ON</button>
-    </div>
-    <div class="row">
       <button id="gridBtn" type="button">Grid overlay</button>
-      <button id="batteryBtn" type="button">Battery-saver</button>
     </div>
     <div class="row">
       <button id="locateBtn" type="button">📍 Locate me (real GPS)</button>
@@ -246,7 +239,6 @@
   var marker = L.marker([40.7580, -73.9855], { draggable: true }).addTo(map);
 
   var shown = { lat: 40.7580, lon: -73.9855 };
-  var batterySaver = false, compassOn = true;
 
   function fmtGrid(v) { return (Math.round(v * 100) / 100).toFixed(2); }
 
@@ -271,8 +263,7 @@
   }
 
   function moved(lat, lon) {
-    if (!batterySaver) { shown.lat = lat; shown.lon = lon; updateWatch("FIX live"); }
-    else { document.getElementById("fix").textContent = "moved · ⟳"; }
+    shown.lat = lat; shown.lon = lon; updateWatch("FIX live");
   }
 
   marker.on("drag", function (e) { var p = e.target.getLatLng(); moved(p.lat, p.lng); });
@@ -288,19 +279,6 @@
   // ---- Controls ----
   document.getElementById("refreshBtn").addEventListener("click", function () {
     var p = marker.getLatLng(); shown.lat = p.lat; shown.lon = p.lng; updateWatch("FIX now");
-  });
-  var compassBtn = document.getElementById("compassBtn");
-  compassBtn.addEventListener("click", function () {
-    compassOn = !compassOn;
-    compassBtn.textContent = "Compass " + (compassOn ? "ON" : "OFF");
-    compassBtn.classList.toggle("on", compassOn);
-    document.getElementById("compass").classList.toggle("off", !compassOn);
-  });
-  var batteryBtn = document.getElementById("batteryBtn");
-  batteryBtn.addEventListener("click", function () {
-    batterySaver = !batterySaver;
-    batteryBtn.classList.toggle("on", batterySaver);
-    document.getElementById("fix").textContent = batterySaver ? "press ⟳ to fix" : "FIX live";
   });
   document.getElementById("locateBtn").addEventListener("click", function () {
     if (!navigator.geolocation) { alert("Geolocation not available in this browser."); return; }

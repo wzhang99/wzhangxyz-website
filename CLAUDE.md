@@ -63,6 +63,20 @@ Every page has an interactive bug/anteater feature:
 - Mobile breakpoint: 600px
 - **Text is selectable** everywhere; `user-select: none` is applied only during bug placement (`body.placing`)
 
+## Design Philosophy (aesthetic bar)
+Aim for distinctive, intentional design; never generic "AI slop." (Adapted from the frontend-design
+plugin — its React/Motion-library bits don't apply to this static HTML/CSS/JS site.)
+- **Typography**: pick fonts with character; avoid Inter/Roboto/Arial/system defaults, and don't
+  reflexively reach for Space Grotesk either. The main site's Courier and the watch pages' LCD/instrument
+  direction are the kind of deliberate, context-specific choices to keep making.
+- **Color/theme**: commit to one cohesive aesthetic via CSS variables; a dominant color with a sharp
+  accent beats a timid, evenly-spread palette.
+- **Motion**: favor CSS-only micro-interactions and a single well-orchestrated, staggered page-load
+  reveal over scattered effects. Always respect `prefers-reduced-motion`.
+- **Backgrounds**: build atmosphere and depth (gradients, texture, contextual effects), not flat fills.
+- Every page should feel designed FOR its context — retro terminal for the main site, a real
+  F-91W-style LCD watch for the Manhattan GPS pages — not cookie-cutter.
+
 ## Pages & Content Plan
 
 ### `index.html` — Landing

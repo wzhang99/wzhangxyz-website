@@ -20,7 +20,7 @@ const cursorHand = document.getElementById('cursor-hand');
 const clearAnteaterBtn = document.createElement('button');
 clearAnteaterBtn.id = 'clear-anteater-btn';
 clearAnteaterBtn.className = 'retro-btn';
-clearAnteaterBtn.textContent = 'clear anteater';
+clearAnteaterBtn.textContent = 'kill anteater';
 document.body.appendChild(clearAnteaterBtn);
 
 const popupBackdrop = document.createElement('div');

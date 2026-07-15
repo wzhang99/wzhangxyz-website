@@ -43,26 +43,30 @@
     </header>
 
     <main class="page-content">
-        <div class="page-title">manhattan gps watch</div>
+        <div class="breadcrumb">
+            <a href="../../index.html">home</a>
+            <span class="sep">&gt;</span>
+            <a href="../../activities.html">activities</a>
+            <span class="sep">&gt;</span>
+            <span class="current">manhattan gps watch</span>
+        </div>
 
         <div class="watch-desc">
-            <p>A watch project. The idea: a Casio F-91W, but with GPS, that tells you
-               which Manhattan cross streets you're standing between instead of just the
-               time. Stand at 72nd and 5th and it reads <span class="watch-reading">72 &times; 5</span>.</p>
+            <p>Custom building an analog watch (as close to my F-91W as possible) with GPS
+               to show me the cross streets in Manhattan on which I am currently located.
+               For example: if I'm at the Crunch on 54th between 7th and 8th (a godforsaken
+               place&mdash;don't go here), it should say <span class="watch-reading">"54 x 7.5"</span>.
+               If I'm getting a fish in Chelsea it should say <span class="watch-reading">"15.5 x 9.5"</span>.
+               And if I'm in Brooklyn it should say <span class="watch-reading">"the suburbs"</span>.</p>
 
-            <p>This is the software half, proven before any soldering. A small grid model
-               turns a raw GPS coordinate into a Manhattan cross street, names your
-               neighborhood, switches Alphabet City over to letters, counts into the
-               negatives below Houston, and reads THE SUBURBS the moment you leave the
-               island. No map data, no internet, no server.</p>
+            <p>While the goal is for the software to eventually make it onto a wristwatch,
+               for now, the latest version will live here on this page.</p>
         </div>
 
         <div class="watch-links">
             <a href="demo.html">&rarr; interactive map <span class="hint">(real street map, drag the pin anywhere)</span></a>
             <a href="live.html">&rarr; live GPS <span class="hint">(open on your phone in NYC and walk around)</span></a>
         </div>
-
-        <div class="watch-note">Next step: get it running on a real chip.</div>
     </main>
 </div>
 

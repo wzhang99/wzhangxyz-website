@@ -5,7 +5,6 @@ body {
     color: #fff;
     font-family: 'Courier New', Courier, monospace;
     font-size: 12px;
-    user-select: none;
 }
 
 /* ── Centered container ─────────────────── */
@@ -77,6 +76,22 @@ body.is-interior {
     color: #777;
 }
 
+/* ── Breadcrumb ─────────────────────────── */
+.breadcrumb {
+    font-size: 12px;
+    margin-bottom: 24px;
+    color: #777;
+    line-height: 2;
+}
+.breadcrumb a {
+    color: #5ecfca;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.breadcrumb a:hover { color: #8ddeda; }
+.breadcrumb .sep { color: #555; margin: 0 6px; }
+.breadcrumb .current { color: #777; }
+
 /* ── Nav links ──────────────────────────── */
 .landing-right a, .page-nav a, .nav-trigger {
     color: #5ecfca;
@@ -130,7 +145,7 @@ body.is-interior {
 #clear-btn.visible { display: block; }
 
 /* ── Custom cursor ──────────────────────── */
-body.placing, body.placing * { cursor: none; }
+body.placing, body.placing * { cursor: none; user-select: none; }
 
 #cursor-wrap {
     position: fixed;

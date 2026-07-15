@@ -88,8 +88,11 @@ Every page has an interactive bug/anteater feature:
 - A GPS-watch software prototype: turns a live GPS coordinate into the Manhattan cross street you're on
   (plus neighborhood, Alphabet City letters, and "the suburbs" when off-island). A step toward an actual
   F-91W-style wristwatch.
-- **Developed in a SEPARATE repo** (`…/Personal/manhattan-gps-watch`). Only the built, self-contained
-  pages are copied here — do NOT develop the watch logic inside this website repo.
+- **Source of truth = THIS folder.** The pages under `activities/manhattan-gps-watch/` are self-contained
+  copies owned here; edit them directly. The separate `…/Personal/manhattan-gps-watch` repo is where Will
+  prototypes the watch, but it is NOT authoritative for the website and WILL diverge — nothing there reaches
+  the live site unless manually copied into this folder. (Runtime CDN deps like Leaflet/OSM tiles/pdf.js are
+  external, not files here.)
 - Pages under `activities/manhattan-gps-watch/`:
   - `index.html` — project page (description + links), site-styled with breadcrumb.
   - `demo.html` — interactive Leaflet/OpenStreetMap map: draggable pin + the watch readout, grid overlay,

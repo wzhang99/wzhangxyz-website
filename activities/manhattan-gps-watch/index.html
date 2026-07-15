@@ -6,20 +6,19 @@
     <title>manhattan gps watch</title>
     <link rel="stylesheet" href="../../shared.css">
     <style>
-        .watch-desc { max-width: 62ch; }
         .watch-desc p { margin-bottom: 1em; }
         .watch-reading { color: #fff; }
         .watch-links { margin: 1.8em 0 0; }
         .watch-links a {
             display: block;
             color: #5ecfca;
-            text-decoration: underline;
-            text-underline-offset: 2px;
+            text-decoration: none;
             margin-bottom: 0.5em;
         }
+        .watch-links a .lbl { text-decoration: underline; text-underline-offset: 2px; }
         .watch-links a:hover { color: #8ddeda; }
-        .watch-links .hint { color: #777; }
-        .watch-note { color: #777; margin-top: 1.8em; max-width: 62ch; }
+        .watch-links .hint { color: #777; text-decoration: none; }
+        .watch-note { color: #777; margin-top: 1.8em; }
     </style>
 </head>
 <body class="is-interior">
@@ -64,8 +63,8 @@
         </div>
 
         <div class="watch-links">
-            <a href="/activities/manhattan-gps-watch/demo">&rarr; interactive map <span class="hint">(real street map, drag the pin anywhere)</span></a>
-            <a href="/activities/manhattan-gps-watch/live">&rarr; live GPS <span class="hint">(open on your phone in NYC and walk around)</span></a>
+            <a href="/activities/manhattan-gps-watch/demo"><span class="lbl">&rarr; interactive map</span> <span class="hint">(real street map, drag the pin anywhere)</span></a>
+            <a href="/activities/manhattan-gps-watch/live"><span class="lbl">&rarr; live GPS</span> <span class="hint">(open on your phone in NYC and walk around)</span></a>
         </div>
     </main>
 </div>

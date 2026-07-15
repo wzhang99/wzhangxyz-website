@@ -170,8 +170,6 @@ body.is-interior {
     color: #fff;
     font-size: 12px;
     line-height: 1.8;
-    cursor: default;
-    user-select: text;
 }
 #anteater-popup .ok {
     display: inline-block;
@@ -184,7 +182,6 @@ body.is-interior {
     font-size: 12px;
     text-decoration: underline;
     text-underline-offset: 2px;
-    cursor: pointer;
 }
 #anteater-popup .ok:hover { color: #8ddeda; }
 
@@ -195,7 +192,7 @@ body.placing, body.placing * { cursor: none; user-select: none; }
     position: fixed;
     pointer-events: none;
     display: none;
-    z-index: 9999;
+    z-index: 100000; /* above the anteater popup so the hand stays on top */
     transform: translate(-8px, -36px);
 }
 

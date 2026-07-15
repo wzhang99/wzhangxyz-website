@@ -11,7 +11,7 @@
   :root {
     --case: #34373b; --case-hi: #4b4f54; --case-lo: #212327;
     --lcd: #9dab8d; --lcd-2: #94a383; --lcd-ink: #191e13;
-    --lcd-dim: rgba(25,30,19,.30); --accent: #c1432a;
+    --lcd-dim: rgba(25,30,19,.30); --accent: #9f5a49;
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
@@ -45,10 +45,10 @@
   .compass { font-weight: 700; }
   .compass.off { opacity: .22; }
   .hero { text-align: center; margin: 1px 0 3px; }
-  .reading { font-size: 30px; font-weight: 700; line-height: 1.02; white-space: nowrap; }
-  .reading .x { opacity: .5; margin: 0 2px; font-weight: 400; }
-  .reading.toofar { font-size: 19px; letter-spacing: .04em; }
-  .caption { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; opacity: .55; margin-top: 1px; }
+  .reading { font-size: 29px; font-weight: 300; line-height: 1.05; white-space: nowrap; }
+  .reading .x { opacity: .45; margin: 0 4px; font-weight: 300; }
+  .reading.toofar { font-size: 18px; font-weight: 300; letter-spacing: .04em; text-transform: lowercase; }
+  .caption { display: none; }
   .hoodline { text-align: center; font-size: 10px; font-weight: 700; letter-spacing: .12em;
     text-transform: uppercase; color: var(--lcd-ink); opacity: .78;
     border-top: 1px solid var(--lcd-dim); margin-top: 6px; padding-top: 6px; }
@@ -69,27 +69,32 @@
   }
   .ctrls button:hover { border-color: var(--accent); }
   .ctrls button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .ctrls button.on { border-color: var(--accent); color: #fff; background: rgba(193,67,42,.35); }
+  .ctrls button.on { border-color: var(--accent); color: #fff; background: rgba(159,90,73,.35); }
   .ctrls .row { display: flex; gap: 6px; width: 100%; }
   .ctrls .row button { flex: 1; }
 
   /* Presets + info panel, bottom-left */
   .panel {
     position: absolute; z-index: 1000; bottom: 14px; left: 14px; max-width: 300px;
-    background: rgba(255,255,255,.94); border-radius: 12px; padding: 12px 13px;
-    box-shadow: 0 6px 18px rgba(0,0,0,.25); font-size: 12.5px; color: #222;
+    background: linear-gradient(150deg, var(--case-hi), var(--case) 42%, var(--case-lo));
+    border-radius: 14px; padding: 13px 14px;
+    box-shadow: 0 10px 26px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.12);
+    font-size: 12.5px; color: #cdd0c9;
   }
   @media (max-width: 560px) { .panel { display: none; } }
-  .panel h1 { font-size: 13px; margin: 0 0 3px; letter-spacing: -.01em; }
-  .panel p { margin: 0 0 9px; color: #555; line-height: 1.45; }
+  .panel h1 { font-size: 12px; margin: 0 0 6px; letter-spacing: .16em; text-transform: uppercase;
+    font-weight: 600; color: #e9eae4; }
+  .panel p { margin: 0 0 10px; color: #a7ac9f; line-height: 1.5; }
+  .panel p b { color: #cdd0c9; }
   .panel .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .panel .chips button {
-    font: inherit; font-size: 11.5px; cursor: pointer; background: #f1efe9;
-    border: 1px solid #dcd8cf; border-radius: 999px; padding: 4px 9px; color: #333;
+    font: inherit; font-size: 11.5px; cursor: pointer; color: #e8e9e3;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16);
+    border-radius: 999px; padding: 4px 10px;
   }
-  .panel .chips button:hover { border-color: var(--accent); color: var(--accent); }
-  .coords { margin-top: 9px; font-variant-numeric: tabular-nums; color: #444; font-size: 11.5px; }
-  .coords b { color: #222; }
+  .panel .chips button:hover { border-color: var(--accent); color: #fff; }
+  .coords { margin-top: 10px; font-variant-numeric: tabular-nums; color: #a7ac9f; font-size: 11.5px; line-height: 1.5; }
+  .coords b { color: #d7dacf; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -128,7 +133,7 @@
 </div>
 
 <div class="panel">
-  <h1>Manhattan GPS Watch — live map</h1>
+  <h1>Manhattan GPS Watch</h1>
   <p>Drag the pin (or click the map) anywhere. The watch reads the cross streets off the real map.
     Turn on <b>Grid overlay</b> to see the model's streets/avenues laid over the actual ones.</p>
   <div class="chips" id="presets"></div>
@@ -267,7 +272,7 @@
 
   function moved(lat, lon) {
     if (!batterySaver) { shown.lat = lat; shown.lon = lon; updateWatch("FIX live"); }
-    else { document.getElementById("fix").textContent = "moved — ⟳"; }
+    else { document.getElementById("fix").textContent = "moved · ⟳"; }
   }
 
   marker.on("drag", function (e) { var p = e.target.getLatLng(); moved(p.lat, p.lng); });

@@ -37,9 +37,13 @@ Every page has an interactive bug/anteater feature:
 - Keep this feature on all pages unless explicitly told otherwise
 
 ## Folder & URL conventions
-- **Pages are flat at the root** as `<section>.html` (about.html, work.html, thesis.html, ...). This
-  keeps clean public URLs (wzhang.xyz/thesis.html) — thesis is conceptually a child of writing but is a
-  clean root file.
+- **Pages are flat at the root** as `<section>.html` (about.html, work.html, thesis.html, ...) — thesis
+  is conceptually a child of writing but is a clean root file.
+- **Clean URLs (no `.html`)**: GitHub Pages already serves `about.html` at `/about` (verified:
+  `/about`, `/activities/manhattan-gps-watch/demo` all 200). So all internal links are **extensionless
+  absolute paths** — `/`, `/about`, `/thesis`, `/activities/manhattan-gps-watch/` (folder index → trailing
+  slash), `/activities/manhattan-gps-watch/demo`. Home is `/`, never `index.html`. Files are NOT renamed;
+  only the links drop the extension. Use absolute (`/foo`) not relative so links work at any folder depth.
 - **Section assets / sub-pages live in a clean-named folder** matching the section: `about/`, `writing/`,
   `activities/`. These were renamed from the old `content - <section>/` folders — folder-name spaces
   produced ugly `%20` public URLs, so clean names → clean URLs. (Empty `content - reading/`, `content - work/`,

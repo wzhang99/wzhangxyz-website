@@ -13,6 +13,13 @@
     font-display: swap;
     src: url("../../fonts/ibm-plex-mono-latin-300-normal.woff2") format("woff2");
   }
+  @font-face {
+    font-family: "Silkscreen";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../../fonts/silkscreen-latin-400-normal.woff2") format("woff2");
+  }
   :root {
     --bg: #0d0f12; --panel: #16191d; --ink: #f4f5f0; --muted: #8b9184;
     --accent: #ff6a3d; --lcd: #a8b79a;
@@ -40,12 +47,14 @@
   /* main readout */
   .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px; }
   .reading {
-    font-family: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
-    font-weight: 300; letter-spacing: 0.01em; line-height: 1; text-align: center;
-    font-size: clamp(40px, 12vw, 76px); white-space: nowrap; color: #e4e6e0;
+    font-family: "Silkscreen", "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 400; letter-spacing: 0.02em; line-height: 1; text-align: center;
+    font-size: clamp(30px, 9vw, 56px); white-space: nowrap; color: #e0243f;
+    text-shadow: 0 0 14px rgba(224,36,63,0.35);
   }
-  .reading .x { color: var(--muted); font-weight: 300; opacity: 0.5; margin: 0 0.22em; }
-  .reading.suburbs { font-size: clamp(30px, 9vw, 54px); letter-spacing: 0.02em; text-transform: lowercase; }
+  .reading .x { font-family: "IBM Plex Mono", monospace; color: #e0243f; font-weight: 300; opacity: 0.6;
+    margin: 0 0.2em; text-shadow: none; }
+  .reading.suburbs { font-size: clamp(24px, 7vw, 44px); letter-spacing: 0.02em; text-transform: lowercase; }
   .caption { display: none; }
   .hood {
     font-size: clamp(12px, 3.4vw, 15px); font-weight: 400; letter-spacing: 0.18em;

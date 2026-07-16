@@ -67,6 +67,7 @@
   .subway .slabel { font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #6b7168; }
   .subway .coord { font-family: "Silkscreen", monospace; font-size: 13px; color: #c9cdc2; }
   .subway .coord .x { font-family: "IBM Plex Mono", monospace; opacity: 0.5; margin: 0 0.12em; }
+  .subway .arrow { display: inline-block; color: #c9cdc2; font-family: "IBM Plex Mono", monospace; }
   .bullet { display: inline-flex; width: 18px; height: 18px; border-radius: 50%; align-items: center;
     justify-content: center; font: 700 10px/1 "IBM Plex Mono", monospace; color: #fff; }
   .cameo { display: none; max-width: 34ch; text-align: center; margin-top: 6px;
@@ -243,6 +244,55 @@
     return '<span class="bullet" style="background:'+(LINES[l]||"#666")+';color:'+(YELLOW[l]?"#111":"#fff")+'">'+l+'</span>';
   }).join(""); }
   function fmtCoord(s){ return d1(labelStreet(s[0])) + '<span class="x">×</span>' + d1(s[1]); }
+  function subwayBearing(st, ave, s){ return Math.atan2(-(s[1]-ave)*3.3, s[0]-st) * 180 / Math.PI; }
+  var FACTS = {
+    "Battery Park City":"landfill from the World Trade Center dig. newest land in Manhattan.",
+    "Financial District":"these streets follow old cow paths, not the grid. good luck.",
+    "Two Bridges":"named for the Brooklyn and Manhattan bridges overhead.",
+    "Tribeca":"TRIangle BElow CAnal. a realtor coined it in the 70s.",
+    "Civic Center":"there's a gorgeous abandoned subway station under City Hall.",
+    "Lower East Side":"once the most densely packed place on earth.",
+    "Little Italy":"the San Gennaro feast has run here since 1926.",
+    "Chinatown":"more bakeries per block than anywhere. get the egg tart.",
+    "Nolita":"NOrth of Little ITAly. yes, they really named it that.",
+    "Hudson Square":"the old printing district. now full of ad agencies.",
+    "SoHo":"SOuth of HOuston. cast-iron facades and $28 salads.",
+    "Alphabet City":"Avenues A, B, C, D. 'Avenue D, you're dead' no longer applies.",
+    "Meatpacking District":"actual meat was packed here until about 2000.",
+    "West Village":"the grid breaks. West 4th crosses West 10th somehow.",
+    "Greenwich Village":"Dylan, the Beats, and $9 million townhouses.",
+    "East Village":"CBGB was here. it's a clothing store now. sorry.",
+    "Union Square":"the greenmarket's run since 1976. get the cider.",
+    "Stuyvesant Town":"11,000 apartments built for returning WWII vets.",
+    "Flatiron District":"the Flatiron is about 6 feet wide at its tip.",
+    "Gramercy Park":"the last private park in NYC. you'll never get a key.",
+    "Chelsea":"the High Line runs through it, on old freight rail.",
+    "NoMad":"NOrth of MADison Square. another realtor acronym.",
+    "Kips Bay":"named for Jacobus Kip's farm. the bay's long buried.",
+    "Hudson Yards":"built on a platform over live rail tracks.",
+    "Murray Hill":"finance bros and a suspicious number of dentists.",
+    "Garment District":"still sews most of America's clothing samples.",
+    "Times Square":"named for the New York Times, which moved out in 1913.",
+    "Hell's Kitchen":"the name stuck; the reputation didn't. now it's brunch.",
+    "Midtown East":"Grand Central's ceiling zodiac is painted backwards.",
+    "Lincoln Square":"Lincoln Center replaced the old San Juan Hill blocks.",
+    "Upper West Side":"Zabar's, strollers the size of cars, and Seinfeld.",
+    "Manhattan Valley":"a real dip in the terrain. hence the name.",
+    "Carnegie Hill":"named for Carnegie's mansion, now the Cooper Hewitt.",
+    "Yorkville":"once German 'Kleindeutschland.' last beer hall closed 2014.",
+    "Lenox Hill":"the hospital here delivered a lot of famous New Yorkers.",
+    "Upper East Side":"old money, the Met, and doormen who quietly judge you.",
+    "Central Park":"bigger than the principality of Monaco.",
+    "Morningside Heights":"Columbia's turf. the cathedral is still unfinished.",
+    "East Harlem":"El Barrio. a birthplace of salsa.",
+    "Harlem":"the Apollo's amateur night launched Ella and Jimi.",
+    "Hamilton Heights":"Hamilton's house, the Grange, got moved twice.",
+    "Washington Heights":"the highest natural point on the island. and 'In the Heights.'",
+    "Inwood":"the last old-growth forest in Manhattan is up here.",
+    "Lower Manhattan":"the oldest part of the city. streets predate the grid.",
+    "Midtown":"more office space than most whole cities.",
+    "Uptown":"everything above 59th. it's a big place."
+  };
 
   function haversine(a, b) {
     var R = 6371000, toRad = Math.PI / 180;
@@ -277,12 +327,16 @@
       readingEl.innerHTML = r.stTxt + ' <span class="x">×</span> ' + r.aveTxt;
       captionEl.textContent = "street × avenue"; hoodEl.textContent = r.hood || "";
     }
-    // nearest subway, shown as a street × avenue coordinate + line bullets
+    // nearest subway: coordinate + arrow pointing toward the station + line bullets
     var stn = nearestStation(g.st, g.ave);
-    subwayEl.innerHTML = '<span class="slabel">subway</span><span class="coord">' + fmtCoord(stn) + '</span>' + bullets(stn[2]);
-    // "you are here" cameo
+    subwayEl.innerHTML = '<span class="slabel">nearest subway</span>'
+      + '<span class="arrow" style="transform:rotate(' + subwayBearing(g.st, g.ave, stn) + 'deg)">↑</span>'
+      + '<span class="coord">' + fmtCoord(stn) + '</span>' + bullets(stn[2]);
+    // "you are here" fun fact — landmark cameo if near one, else the neighborhood's fact
     var cam = nearestCameo(g.st, g.ave);
-    if (cam) { cameoEl.className = "cameo show"; cameoEl.innerHTML = '<span class="ctag">▸ you are here</span>' + cam[3]; }
+    var hood = r.far ? neighborhood(g.ave, g.st) : (r.hood || neighborhood(g.ave, g.st));
+    var fact = cam ? cam[3] : (FACTS[hood] || null);
+    if (fact) { cameoEl.className = "cameo show"; cameoEl.innerHTML = '<span class="ctag">▸ you are here</span>' + fact; }
     else { cameoEl.className = "cameo"; }
     // signal quality
     var q = acc <= 15 ? "ok" : acc <= 40 ? "warn" : "bad";

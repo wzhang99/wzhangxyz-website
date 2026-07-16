@@ -8,6 +8,10 @@
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
       crossorigin="" />
 <style>
+  @font-face { font-family: "Silkscreen"; font-display: swap;
+    src: url("../../fonts/silkscreen-latin-400-normal.woff2") format("woff2"); }
+  @font-face { font-family: "IBM Plex Mono"; font-weight: 300; font-display: swap;
+    src: url("../../fonts/ibm-plex-mono-latin-300-normal.woff2") format("woff2"); }
   :root {
     --case: #34373b; --case-hi: #4b4f54; --case-lo: #212327;
     --lcd: #9dab8d; --lcd-2: #94a383; --lcd-ink: #191e13;
@@ -32,32 +36,47 @@
   .brand { text-align: center; color: #cdd0d4; font-size: 9px; letter-spacing: .22em;
            text-transform: uppercase; margin-bottom: 8px; opacity: .85; }
   .lcd {
-    background: linear-gradient(170deg, var(--lcd), var(--lcd-2));
-    border-radius: 7px; padding: 11px 12px 10px; color: var(--lcd-ink);
-    font-family: "DIN Alternate", ui-monospace, "Cascadia Mono", Consolas, monospace;
+    background: linear-gradient(170deg, #14171b, #0b0d10);
+    border-radius: 7px; padding: 11px 12px 10px; color: #c9cdc2;
+    font-family: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
     font-variant-numeric: tabular-nums; position: relative; overflow: hidden;
+    border: 1px solid rgba(255,255,255,.05);
   }
   .lcd::after { content: ""; position: absolute; inset: 0;
-    background: linear-gradient(105deg, rgba(255,255,255,.16), transparent 40%); pointer-events: none; }
-  .lcd-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px;
-             border-bottom: 1px solid var(--lcd-dim); padding-bottom: 5px; margin-bottom: 6px; }
-  .mode { font-weight: 700; letter-spacing: .1em; }
-  .hero { text-align: center; margin: 1px 0 3px; }
-  .reading { font-size: 29px; font-weight: 300; line-height: 1.05; white-space: nowrap; }
-  .reading .x { opacity: .45; margin: 0 4px; font-weight: 300; }
-  .reading.toofar { font-size: 18px; font-weight: 300; letter-spacing: .04em; text-transform: lowercase; }
+    background: linear-gradient(105deg, rgba(255,255,255,.05), transparent 40%); pointer-events: none; }
+  .lcd-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px;
+             border-bottom: 1px solid rgba(255,255,255,.08); padding-bottom: 5px; margin-bottom: 7px; }
+  .mode { font-weight: 700; letter-spacing: .1em; color: #8b9184; }
+  .odo { font-weight: 700; letter-spacing: .08em; color: #8b9184; }
+  .hero { text-align: center; margin: 3px 0 4px; }
+  .reading { font-family: "Silkscreen", "IBM Plex Mono", monospace; font-size: 24px; font-weight: 400;
+    line-height: 1.15; white-space: nowrap; color: #e0243f; text-shadow: 0 0 12px rgba(224,36,63,.35); }
+  .reading .x { font-family: "IBM Plex Mono", monospace; opacity: .6; margin: 0 .12em; font-weight: 300;
+    color: #e0243f; text-shadow: none; }
+  .reading.toofar { font-size: 16px; font-weight: 400; letter-spacing: .02em; text-transform: lowercase; }
   .caption { display: none; }
-  .hoodline { text-align: center; font-size: 10px; font-weight: 700; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--lcd-ink); opacity: .78;
-    border-top: 1px solid var(--lcd-dim); margin-top: 6px; padding-top: 6px; }
+  .hoodline { text-align: center; font-size: 10px; font-weight: 400; letter-spacing: .12em;
+    text-transform: lowercase; color: #8ea38a; opacity: .9;
+    border-top: 1px solid rgba(255,255,255,.08); margin-top: 7px; padding-top: 7px; }
+  .lcd-sub { display: flex; align-items: center; justify-content: center; gap: 5px; flex-wrap: wrap;
+    border-top: 1px solid rgba(255,255,255,.08); margin-top: 7px; padding-top: 7px; font-size: 10px; color: #8b9184; }
+  .lcd-sub .slabel { font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; color: #6b7168; }
+  .lcd-sub .coord { font-family: "Silkscreen", monospace; font-size: 11px; color: #c9cdc2; }
+  .lcd-sub .coord .x { font-family: "IBM Plex Mono", monospace; opacity: .5; margin: 0 .1em; }
+  .bullet { display: inline-flex; width: 16px; height: 16px; border-radius: 50%; align-items: center;
+    justify-content: center; font: 700 9px/1 "IBM Plex Mono", monospace; color: #fff; }
   .lcd-bot { display: flex; justify-content: space-between; align-items: baseline;
-             border-top: 1px solid var(--lcd-dim); padding-top: 6px; margin-top: 6px; }
-  .clock { font-size: 21px; font-weight: 700; }
+             border-top: 1px solid rgba(255,255,255,.08); padding-top: 7px; margin-top: 7px; }
+  .clock { font-size: 20px; font-weight: 700; color: #c9cdc2; }
   .clock .sec { font-size: 12px; opacity: .6; }
   .colon.blink { animation: blink 1s steps(1) infinite; }
   @keyframes blink { 50% { opacity: .25; } }
   @media (prefers-reduced-motion: reduce) { .colon.blink { animation: none; } }
   .fix { font-size: 10px; opacity: .6; text-align: right; }
+  .cameo { display: none; margin: 10px 2px 0; font-size: 10.5px; line-height: 1.5; color: #b7c3b2; }
+  .cameo.show { display: block; }
+  .cameo .ctag { display: block; color: #e0243f; letter-spacing: .12em; text-transform: uppercase;
+    font-size: 8.5px; margin-bottom: 4px; opacity: .9; }
 
   .ctrls { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
   .ctrls button {
@@ -103,17 +122,20 @@
   <div class="lcd">
     <div class="lcd-top">
       <span class="mode" id="dateStr">--</span>
+      <span class="odo" id="odo">0 st</span>
     </div>
     <div class="hero">
       <div class="reading" id="reading">—</div>
       <div class="caption" id="caption">street × avenue</div>
     </div>
     <div class="hoodline" id="hood">—</div>
+    <div class="lcd-sub" id="subwayLine"></div>
     <div class="lcd-bot">
       <span class="clock" id="clock">--<span class="colon blink">:</span>--<span class="sec">·--</span></span>
       <span class="fix" id="fix">FIX now</span>
     </div>
   </div>
+  <div class="cameo" id="cameo"></div>
   <div class="ctrls">
     <div class="row">
       <button class="primary" id="refreshBtn" type="button">⟳ Refresh</button>
@@ -229,6 +251,56 @@
     return "";
   }
 
+  // ---- nearest subway + cameos (approximate model coords: [street, avenue, ...]) ----
+  var LINES = {"1":"#EE352E","2":"#EE352E","3":"#EE352E","4":"#00933C","5":"#00933C","6":"#00933C",
+    "7":"#B933AD","A":"#0039A6","C":"#0039A6","E":"#0039A6","B":"#FF6319","D":"#FF6319","F":"#FF6319","M":"#FF6319",
+    "N":"#FCCC0A","Q":"#FCCC0A","R":"#FCCC0A","W":"#FCCC0A","G":"#6CBE45","J":"#996633","Z":"#996633",
+    "L":"#A7A9AC","S":"#808183"};
+  var YELLOW = {"N":1,"Q":1,"R":1,"W":1};
+  var STATIONS = [
+    [45,7,["1","2","3","7","N","Q","R"]],[42,3,["4","5","6","7","S"]],
+    [34,6.2,["B","D","F","M","N","Q","R","W"]],[34,7.2,["1","2","3"]],[28,6,["1"]],
+    [23,6,["F","M"]],[23,5.2,["N","R","W"]],
+    [14,4.3,["4","5","6","L","N","Q","R","W"]],[14,2.5,["L"]],[14,7.6,["A","C","E","L"]],
+    [8,4,["6"]],[4,6.1,["A","B","C","D","E","F","M"]],[2,4.6,["6","B","D","F","M"]],
+    [10,7.6,["1"]],[1,3.4,["F"]],[-2,3,["F","J","M","Z"]],[-6,5.4,["6","J","N","Q","R","W","Z"]],
+    [-20,5.6,["4","5","6"]],[-30,5.8,["2","3","4","5","A","C","J","Z"]],[-38,6,["2","3"]],
+    [59,8,["1","A","B","C","D"]],[59,5,["N","R","W"]],[59,3.5,["4","5","6"]],
+    [66,9.3,["1"]],[72,9.5,["1","2","3"]],[72,3.6,["Q"]],
+    [86,3.5,["4","5","6"]],[86,9.6,["1"]],[96,3.4,["6"]],[103,9.7,["1"]],
+    [116,8.9,["1"]],[125,4,["4","5","6"]],[125,8.2,["A","B","C","D"]],[125,10,["1"]]
+  ];
+  var CAMEOS = [
+    [1.5,3.4,3,"“I'll have what she's having.” (Katz's, the window table.)"],
+    [23,5.3,2.5,"the Flatiron doubles as the Daily Bugle. J.J.J. wants photos."],
+    [44,7,3,"the Naked Cowboy is around here somewhere. keep walking."],
+    [10,8,2,"the Friends building is up the block. you'll never afford it."],
+    [125,8,3,"the Apollo. it's showtime."],
+    [-40,5.8,3,"Charging Bull is a block south. mind the tourists."],
+    [4,5.3,2,"Washington Square: chess hustlers ahead. don't play for money."],
+    [15,9,2.5,"Chelsea Market. get the lobster roll."],
+    [12,4.7,1.8,"the Strand: eighteen miles of books."],
+    [42,3,2,"Grand Central: the ceiling's zodiac is painted backwards."],
+    [9,7.6,1.8,"Stonewall. where it kicked off, 1969."],
+    [7,3.2,1.8,"McSorley's: your only choice is light or dark."],
+    [34,5.4,2.5,"the Empire State Building. King Kong wept here."],
+    [70,6.5,7,"you're in the Park. touch grass, literally."],
+    [-2,5,2,"Little Italy: three blocks, forty restaurants, one cannoli."],
+    [0,4.6,2.5,"SoHo: cast-iron facades and $28 salads."],
+    [72,8.1,2,"the Dakota. cue Rosemary's Baby."],
+    [50,6.3,2.5,"Rockefeller Center. don't look up mid-photo."],
+    [-30,5.8,2.5,"the Oculus: a $4B train station shaped like a dinosaur."]
+  ];
+  function nearestStation(st, ave){ var b=null,bd=Infinity; for(var i=0;i<STATIONS.length;i++){var s=STATIONS[i];
+    var d=(st-s[0])*(st-s[0])+10.9*(ave-s[1])*(ave-s[1]); if(d<bd){bd=d;b=s;}} return b; }
+  function nearestCameo(st, ave){ var b=null,bd=Infinity; for(var i=0;i<CAMEOS.length;i++){var c=CAMEOS[i];
+    var d=Math.sqrt((st-c[0])*(st-c[0])+10.9*(ave-c[1])*(ave-c[1])); if(d<c[2]&&d<bd){bd=d;b=c;}} return b; }
+  function bullets(lines){ return lines.map(function(l){
+    return '<span class="bullet" style="background:'+(LINES[l]||"#666")+';color:'+(YELLOW[l]?"#111":"#fff")+'">'+l+'</span>';
+  }).join(""); }
+  function fmtCoord(s){ return d1(labelStreet(s[0])) + '<span class="x">×</span>' + d1(s[1]); }
+  var odoStreets = 0, odoPrevSt = null;
+
   // ---- MAP ----
   var map = L.map("map", { zoomControl: true }).setView([40.7580, -73.9855], 13);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -259,6 +331,17 @@
       "<b>lat</b> " + shown.lat.toFixed(5) + "  <b>lon</b> " + shown.lon.toFixed(5) +
       "<br><b>model</b> street " + fmtGrid(r.st) + " · avenue " + fmtGrid(r.ave) +
       (r.hood ? "<br><b>area</b> " + r.hood : "");
+    // nearest subway (coordinate + bullets), you-are-here cameo, street odometer
+    var stn = nearestStation(r.st, r.ave);
+    document.getElementById("subwayLine").innerHTML =
+      '<span class="slabel">subway</span><span class="coord">' + fmtCoord(stn) + '</span>' + bullets(stn[2]);
+    var cam = nearestCameo(r.st, r.ave);
+    var cEl = document.getElementById("cameo");
+    if (cam) { cEl.className = "cameo show"; cEl.innerHTML = '<span class="ctag">▸ you are here</span>' + cam[3]; }
+    else { cEl.className = "cameo"; }
+    if (odoPrevSt != null) odoStreets += Math.abs(r.st - odoPrevSt);
+    odoPrevSt = r.st;
+    document.getElementById("odo").textContent = Math.round(odoStreets) + " st";
     if (fixLabel) document.getElementById("fix").textContent = fixLabel;
   }
 

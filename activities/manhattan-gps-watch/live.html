@@ -61,6 +61,20 @@
     text-transform: lowercase; color: var(--lcd); opacity: 0.75; text-align: center; min-height: 1.2em;
   }
 
+  /* nearest subway + you-are-here cameo */
+  .subway { display: flex; align-items: center; justify-content: center; gap: 7px; flex-wrap: wrap;
+    font: 11px/1 "IBM Plex Mono", monospace; color: var(--muted); letter-spacing: 0.04em; margin-top: 4px; }
+  .subway .slabel { font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #6b7168; }
+  .subway .coord { font-family: "Silkscreen", monospace; font-size: 13px; color: #c9cdc2; }
+  .subway .coord .x { font-family: "IBM Plex Mono", monospace; opacity: 0.5; margin: 0 0.12em; }
+  .bullet { display: inline-flex; width: 18px; height: 18px; border-radius: 50%; align-items: center;
+    justify-content: center; font: 700 10px/1 "IBM Plex Mono", monospace; color: #fff; }
+  .cameo { display: none; max-width: 34ch; text-align: center; margin-top: 6px;
+    font: 11.5px/1.5 "IBM Plex Mono", monospace; color: #9fb0a2; }
+  .cameo.show { display: block; }
+  .cameo .ctag { display: block; color: #e0243f; letter-spacing: 0.14em; text-transform: uppercase;
+    font-size: 9px; margin-bottom: 5px; opacity: 0.9; }
+
   /* footer meta */
   .meta { padding: 10px 18px calc(30px + env(safe-area-inset-bottom)); font-size: 12px; color: var(--muted); text-align: center; line-height: 1.7; }
   .meta b { color: #c9cdc2; font-weight: 600; }
@@ -95,6 +109,8 @@
     <div class="reading" id="reading">— <span class="x">×</span> —</div>
     <div class="caption" id="caption">street × avenue</div>
     <div class="hood" id="hood"></div>
+    <div class="subway" id="subway"></div>
+    <div class="cameo" id="cameo"></div>
   </div>
   <div class="meta" id="meta"></div>
 </div>
@@ -175,8 +191,58 @@
   var readingEl = document.getElementById("reading"), captionEl = document.getElementById("caption"),
       hoodEl = document.getElementById("hood"), dot = document.getElementById("dot"),
       statusText = document.getElementById("statusText"), ageEl = document.getElementById("age"),
-      meta = document.getElementById("meta");
-  var lastFixMs = 0, watchId = null, wakeLock = null, totalMeters = 0, prev = null;
+      meta = document.getElementById("meta"),
+      subwayEl = document.getElementById("subway"), cameoEl = document.getElementById("cameo");
+  var lastFixMs = 0, watchId = null, wakeLock = null, totalMeters = 0, prev = null, streets = 0, odoSt = null;
+
+  // ---- nearest subway + cameos (approximate model coords: [street, avenue, ...]) ----
+  var LINES = {"1":"#EE352E","2":"#EE352E","3":"#EE352E","4":"#00933C","5":"#00933C","6":"#00933C",
+    "7":"#B933AD","A":"#0039A6","C":"#0039A6","E":"#0039A6","B":"#FF6319","D":"#FF6319","F":"#FF6319","M":"#FF6319",
+    "N":"#FCCC0A","Q":"#FCCC0A","R":"#FCCC0A","W":"#FCCC0A","G":"#6CBE45","J":"#996633","Z":"#996633",
+    "L":"#A7A9AC","S":"#808183"};
+  var YELLOW = {"N":1,"Q":1,"R":1,"W":1};
+  var STATIONS = [
+    [45,7,["1","2","3","7","N","Q","R"]],[42,3,["4","5","6","7","S"]],
+    [34,6.2,["B","D","F","M","N","Q","R","W"]],[34,7.2,["1","2","3"]],[28,6,["1"]],
+    [23,6,["F","M"]],[23,5.2,["N","R","W"]],
+    [14,4.3,["4","5","6","L","N","Q","R","W"]],[14,2.5,["L"]],[14,7.6,["A","C","E","L"]],
+    [8,4,["6"]],[4,6.1,["A","B","C","D","E","F","M"]],[2,4.6,["6","B","D","F","M"]],
+    [10,7.6,["1"]],[1,3.4,["F"]],[-2,3,["F","J","M","Z"]],[-6,5.4,["6","J","N","Q","R","W","Z"]],
+    [-20,5.6,["4","5","6"]],[-30,5.8,["2","3","4","5","A","C","J","Z"]],[-38,6,["2","3"]],
+    [59,8,["1","A","B","C","D"]],[59,5,["N","R","W"]],[59,3.5,["4","5","6"]],
+    [66,9.3,["1"]],[72,9.5,["1","2","3"]],[72,3.6,["Q"]],
+    [86,3.5,["4","5","6"]],[86,9.6,["1"]],[96,3.4,["6"]],[103,9.7,["1"]],
+    [116,8.9,["1"]],[125,4,["4","5","6"]],[125,8.2,["A","B","C","D"]],[125,10,["1"]]
+  ];
+  var CAMEOS = [
+    [1.5,3.4,3,"“I'll have what she's having.” (Katz's, the window table.)"],
+    [23,5.3,2.5,"the Flatiron doubles as the Daily Bugle. J.J.J. wants photos."],
+    [44,7,3,"the Naked Cowboy is around here somewhere. keep walking."],
+    [10,8,2,"the Friends building is up the block. you'll never afford it."],
+    [125,8,3,"the Apollo. it's showtime."],
+    [-40,5.8,3,"Charging Bull is a block south. mind the tourists."],
+    [4,5.3,2,"Washington Square: chess hustlers ahead. don't play for money."],
+    [15,9,2.5,"Chelsea Market. get the lobster roll."],
+    [12,4.7,1.8,"the Strand: eighteen miles of books."],
+    [42,3,2,"Grand Central: the ceiling's zodiac is painted backwards."],
+    [9,7.6,1.8,"Stonewall. where it kicked off, 1969."],
+    [7,3.2,1.8,"McSorley's: your only choice is light or dark."],
+    [34,5.4,2.5,"the Empire State Building. King Kong wept here."],
+    [70,6.5,7,"you're in the Park. touch grass, literally."],
+    [-2,5,2,"Little Italy: three blocks, forty restaurants, one cannoli."],
+    [0,4.6,2.5,"SoHo: cast-iron facades and $28 salads."],
+    [72,8.1,2,"the Dakota. cue Rosemary's Baby."],
+    [50,6.3,2.5,"Rockefeller Center. don't look up mid-photo."],
+    [-30,5.8,2.5,"the Oculus: a $4B train station shaped like a dinosaur."]
+  ];
+  function nearestStation(st, ave){ var b=null,bd=Infinity; for(var i=0;i<STATIONS.length;i++){var s=STATIONS[i];
+    var d=(st-s[0])*(st-s[0])+10.9*(ave-s[1])*(ave-s[1]); if(d<bd){bd=d;b=s;}} return b; }
+  function nearestCameo(st, ave){ var b=null,bd=Infinity; for(var i=0;i<CAMEOS.length;i++){var c=CAMEOS[i];
+    var d=Math.sqrt((st-c[0])*(st-c[0])+10.9*(ave-c[1])*(ave-c[1])); if(d<c[2]&&d<bd){bd=d;b=c;}} return b; }
+  function bullets(lines){ return lines.map(function(l){
+    return '<span class="bullet" style="background:'+(LINES[l]||"#666")+';color:'+(YELLOW[l]?"#111":"#fff")+'">'+l+'</span>';
+  }).join(""); }
+  function fmtCoord(s){ return d1(labelStreet(s[0])) + '<span class="x">×</span>' + d1(s[1]); }
 
   function haversine(a, b) {
     var R = 6371000, toRad = Math.PI / 180;
@@ -202,6 +268,7 @@
     var lat = pos.coords.latitude, lon = pos.coords.longitude, acc = pos.coords.accuracy || 999;
     lastFixMs = Date.now();
     var r = reading(lat, lon);
+    var g = toGrid(lat, lon);
     if (r.far) {
       readingEl.className = "reading suburbs"; readingEl.textContent = "THE SUBURBS";
       captionEl.textContent = "not manhattan"; hoodEl.textContent = "";
@@ -210,17 +277,27 @@
       readingEl.innerHTML = r.stTxt + ' <span class="x">×</span> ' + r.aveTxt;
       captionEl.textContent = "street × avenue"; hoodEl.textContent = r.hood || "";
     }
+    // nearest subway, shown as a street × avenue coordinate + line bullets
+    var stn = nearestStation(g.st, g.ave);
+    subwayEl.innerHTML = '<span class="slabel">subway</span><span class="coord">' + fmtCoord(stn) + '</span>' + bullets(stn[2]);
+    // "you are here" cameo
+    var cam = nearestCameo(g.st, g.ave);
+    if (cam) { cameoEl.className = "cameo show"; cameoEl.innerHTML = '<span class="ctag">▸ you are here</span>' + cam[3]; }
+    else { cameoEl.className = "cameo"; }
     // signal quality
     var q = acc <= 15 ? "ok" : acc <= 40 ? "warn" : "bad";
     dot.className = "dot " + q;
     statusText.textContent = "GPS ±" + Math.round(acc) + " m" + (acc > 40 ? " · weak, seek open sky" : "");
-    // distance walked
+    // movement → street odometer (north–south blocks, gated against GPS jitter)
     var here = { lat: lat, lon: lon };
-    if (prev) totalMeters += haversine(prev, here);
+    var step = prev ? haversine(prev, here) : 0;
+    if (prev) totalMeters += step;
     prev = here;
+    if (odoSt == null) odoSt = g.st;
+    else if (step > 6) { streets += Math.abs(g.st - odoSt); odoSt = g.st; }
+    var sN = Math.round(streets);
     meta.innerHTML = "<b>" + lat.toFixed(5) + ", " + lon.toFixed(5) + "</b>"
-      + (r.far ? "" : " &nbsp;·&nbsp; model st " + r.st.toFixed(1) + " · ave " + r.ave.toFixed(1))
-      + "<br>walked <b>" + (totalMeters < 1000 ? Math.round(totalMeters) + " m" : (totalMeters / 1000).toFixed(2) + " km") + "</b>";
+      + " &nbsp;·&nbsp; walked <b>" + sN + (sN === 1 ? " street" : " streets") + "</b>";
     fitReading();
   }
 

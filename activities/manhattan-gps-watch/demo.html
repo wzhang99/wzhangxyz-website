@@ -144,6 +144,9 @@
       <button id="gridBtn" type="button">Grid overlay</button>
     </div>
     <div class="row">
+      <button id="lmBtn" type="button">★ All landmarks</button>
+    </div>
+    <div class="row">
       <button id="locateBtn" type="button">📍 Locate me (real GPS)</button>
     </div>
   </div>
@@ -452,6 +455,25 @@
     gridOn = !gridOn;
     if (gridOn) gridLayer.addTo(map); else map.removeLayer(gridLayer);
     gridBtn.classList.toggle("on", gridOn);
+  });
+
+  // ---- Landmark overlay (every fun-fact spot as a dot; popup = name + blurb) ----
+  // ~1400 dots: canvas renderer keeps pan/zoom smooth where SVG would chug
+  var lmRenderer = L.canvas({ padding: 0.3 });
+  var lmLayer = L.layerGroup();
+  LANDMARKS.forEach(function (lk) {
+    // bubblingMouseEvents:false so tapping a dot opens its popup without moving the pin
+    L.circleMarker([lk.lat, lk.lon], { renderer: lmRenderer, radius: 5, color: "#7c2130", weight: 1.5,
+        fillColor: "#e0243f", fillOpacity: 0.85, bubblingMouseEvents: false })
+      .bindPopup("<b>" + lk.name + "</b><br>" + lk.blurb, { maxWidth: 240 })
+      .addTo(lmLayer);
+  });
+  var lmOn = false;
+  var lmBtn = document.getElementById("lmBtn");
+  lmBtn.addEventListener("click", function () {
+    lmOn = !lmOn;
+    if (lmOn) lmLayer.addTo(map); else map.removeLayer(lmLayer);
+    lmBtn.classList.toggle("on", lmOn);
   });
 
   // ---- Presets ----
